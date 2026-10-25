@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CategoriaController;
 use App\Http\Controllers\Api\ProductoController;
 use App\Http\Controllers\Api\ClienteController;
+use App\Http\Controllers\Api\PedidoController;
 
 Route::get('/estado', function () {
     return response()->json([
@@ -18,6 +19,7 @@ Route::post('/login', [AuthController::class, 'login'])
     ->middleware('throttle:5,1');
 
 Route::middleware('auth:sanctum')->group(function () {
+
 
     // Consultar el usuario autenticado.
     Route::get('/user', function (Request $request) {
@@ -182,5 +184,31 @@ Route::middleware('auth:sanctum')->group(function () {
         [ClienteController::class, 'destroy']
     )->middleware('rol.restaurante:administrador');
 
+    
+    // Consultar y crear pedidos.
+    Route::get(
+        '/restaurantes/{restaurante}/pedidos',
+        [PedidoController::class, 'index']
+    )->middleware('rol.restaurante:administrador,empleado,cajero');
+
+    Route::post(
+        '/restaurantes/{restaurante}/pedidos',
+        [PedidoController::class, 'store']
+    )->middleware('rol.restaurante:administrador,empleado,cajero');
+
+    Route::get(
+        '/restaurantes/{restaurante}/pedidos/{pedido}',
+        [PedidoController::class, 'show']
+    )->middleware('rol.restaurante:administrador,empleado,cajero');
+
+    Route::patch(
+    '/restaurantes/{restaurante}/pedidos/{pedido}/estado',
+    [PedidoController::class, 'actualizarEstado']
+    )->middleware('rol.restaurante:administrador,empleado,cajero');
+
+    Route::get(
+    '/restaurantes/{restaurante}/pedidos/{pedido}/historial',
+    [PedidoController::class, 'historial']
+    )->middleware('rol.restaurante:administrador,empleado,cajero');
 
 });
