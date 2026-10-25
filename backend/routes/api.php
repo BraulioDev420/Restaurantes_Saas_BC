@@ -3,9 +3,11 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CategoriaController;
 use App\Http\Controllers\Api\ClienteController;
+use App\Http\Controllers\Api\GastoController;
 use App\Http\Controllers\Api\PagoController;
 use App\Http\Controllers\Api\PedidoController;
 use App\Http\Controllers\Api\ProductoController;
+use App\Http\Controllers\Api\ReporteController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -222,5 +224,42 @@ Route::middleware('auth:sanctum')->group(function () {
         '/restaurantes/{restaurante}/pagos/{pago}/comprobante',
         [PagoController::class, 'descargarComprobante']
     )->middleware('rol.restaurante:administrador,empleado,cajero');
+
+    // Gastos: consulta para los roles operativos; gestión restringida.
+    Route::get(
+        '/restaurantes/{restaurante}/gastos',
+        [GastoController::class, 'index']
+    )->middleware('rol.restaurante:administrador,empleado,cajero');
+
+    Route::post(
+        '/restaurantes/{restaurante}/gastos',
+        [GastoController::class, 'store']
+    )->middleware('rol.restaurante:administrador,cajero');
+
+    Route::get(
+        '/restaurantes/{restaurante}/gastos/{gasto}',
+        [GastoController::class, 'show']
+    )->middleware('rol.restaurante:administrador,empleado,cajero');
+
+    Route::put(
+        '/restaurantes/{restaurante}/gastos/{gasto}',
+        [GastoController::class, 'update']
+    )->middleware('rol.restaurante:administrador,cajero');
+
+    Route::patch(
+        '/restaurantes/{restaurante}/gastos/{gasto}',
+        [GastoController::class, 'update']
+    )->middleware('rol.restaurante:administrador,cajero');
+
+    Route::delete(
+        '/restaurantes/{restaurante}/gastos/{gasto}',
+        [GastoController::class, 'destroy']
+    )->middleware('rol.restaurante:administrador');
+
+    // Reportes financieros y estadísticas del restaurante.
+    Route::get(
+        '/restaurantes/{restaurante}/reportes/resumen',
+        [ReporteController::class, 'resumen']
+    )->middleware('rol.restaurante:administrador');
 
 });
