@@ -1,9 +1,7 @@
 <?php
-
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Cliente;
 use App\Models\Pedido;
 use App\Models\Producto;
 use Illuminate\Http\JsonResponse;
@@ -19,6 +17,11 @@ class PedidoController extends Controller
         $pedidos = Pedido::query()
             ->where('id_restaurante', $restaurante)
             ->with('detalles')
+            ->withSum([
+                'pagos as pagos_verificados_sum_monto' => function ($consulta) {
+                    $consulta->where('estado', 'verificado');
+                },
+            ], 'monto')
             ->orderByDesc('creado_en')
             ->get();
 
@@ -28,29 +31,29 @@ class PedidoController extends Controller
     public function store(Request $request, string $restaurante): JsonResponse
     {
         $datos = $request->validate([
-            'id_cliente' => [
+            'id_cliente'               => [
                 'nullable',
                 'integer',
                 Rule::exists('clientes', 'id_cliente')
                     ->where('id_restaurante', $restaurante),
             ],
-            'nombre_cliente' => ['required', 'string', 'max:150'],
-            'telefono_cliente' => ['required', 'string', 'max:30'],
-            'correo_cliente' => ['nullable', 'email', 'max:150'],
-            'tipo_entrega' => [
+            'nombre_cliente'           => ['required', 'string', 'max:150'],
+            'telefono_cliente'         => ['required', 'string', 'max:30'],
+            'correo_cliente'           => ['nullable', 'email', 'max:150'],
+            'tipo_entrega'             => [
                 'required',
                 Rule::in(['domicilio', 'recoger', 'mesa']),
             ],
-            'direccion_entrega' => ['nullable', 'string', 'max:255'],
-            'notas' => ['nullable', 'string'],
-            'costo_domicilio' => [
+            'direccion_entrega'        => ['nullable', 'string', 'max:255'],
+            'notas'                    => ['nullable', 'string'],
+            'costo_domicilio'          => [
                 'sometimes',
                 'numeric',
                 'min:0',
                 'max:9999999999.99',
             ],
-            'detalles' => ['required', 'array', 'min:1'],
-            'detalles.*.id_producto' => [
+            'detalles'                 => ['required', 'array', 'min:1'],
+            'detalles.*.id_producto'   => [
                 'required',
                 'integer',
                 'distinct',
@@ -58,7 +61,7 @@ class PedidoController extends Controller
                     ->where('id_restaurante', $restaurante)
                     ->where('disponible', true),
             ],
-            'detalles.*.cantidad' => [
+            'detalles.*.cantidad'      => [
                 'required',
                 'integer',
                 'min:1',
@@ -107,40 +110,40 @@ class PedidoController extends Controller
                 $producto = $productos->get($detalle['id_producto']);
 
                 $subtotal += (float) $producto->precio
-                    * $detalle['cantidad'];
+                     * $detalle['cantidad'];
             }
 
             $costoDomicilio = (float) ($datos['costo_domicilio'] ?? 0);
 
             $pedido = Pedido::create([
-                'id_restaurante' => (int) $restaurante,
-                'id_cliente' => $datos['id_cliente'] ?? null,
-                'numero_pedido' => 'PED-' . bin2hex(random_bytes(8)),
-                'nombre_cliente' => $datos['nombre_cliente'],
-                'telefono_cliente' => $datos['telefono_cliente'],
-                'correo_cliente' => $datos['correo_cliente'] ?? null,
-                'tipo_entrega' => $datos['tipo_entrega'],
+                'id_restaurante'    => (int) $restaurante,
+                'id_cliente'        => $datos['id_cliente'] ?? null,
+                'numero_pedido'     => 'PED-' . bin2hex(random_bytes(8)),
+                'nombre_cliente'    => $datos['nombre_cliente'],
+                'telefono_cliente'  => $datos['telefono_cliente'],
+                'correo_cliente'    => $datos['correo_cliente'] ?? null,
+                'tipo_entrega'      => $datos['tipo_entrega'],
                 'direccion_entrega' => $datos['direccion_entrega'] ?? null,
-                'notas' => $datos['notas'] ?? null,
-                'subtotal' => $subtotal,
-                'costo_domicilio' => $costoDomicilio,
-                'total' => $subtotal + $costoDomicilio,
-                'estado' => 'pendiente',
+                'notas'             => $datos['notas'] ?? null,
+                'subtotal'          => $subtotal,
+                'costo_domicilio'   => $costoDomicilio,
+                'total'             => $subtotal + $costoDomicilio,
+                'estado'            => 'pendiente',
             ]);
 
             foreach ($datos['detalles'] as $detalle) {
                 $producto = $productos->get($detalle['id_producto']);
                 $cantidad = $detalle['cantidad'];
-                $precio = (float) $producto->precio;
+                $precio   = (float) $producto->precio;
 
                 $pedido->detalles()->create([
-                    'id_restaurante' => (int) $restaurante,
-                    'id_producto' => $producto->id_producto,
+                    'id_restaurante'  => (int) $restaurante,
+                    'id_producto'     => $producto->id_producto,
                     'nombre_producto' => $producto->nombre,
-                    'cantidad' => $cantidad,
+                    'cantidad'        => $cantidad,
                     'precio_unitario' => $precio,
-                    'subtotal' => $precio * $cantidad,
-                    'observaciones' => $detalle['observaciones'] ?? null,
+                    'subtotal'        => $precio * $cantidad,
+                    'observaciones'   => $detalle['observaciones'] ?? null,
                 ]);
             }
 
@@ -149,7 +152,7 @@ class PedidoController extends Controller
 
         return response()->json([
             'mensaje' => 'Pedido creado correctamente.',
-            'pedido' => $pedido->load('detalles'),
+            'pedido'  => $pedido->load('detalles'),
         ], 201);
     }
 
@@ -164,101 +167,101 @@ class PedidoController extends Controller
         return response()->json(['pedido' => $registro]);
     }
 
-public function actualizarEstado(
-    Request $request,
-    string $restaurante,
-    string $pedido
-): JsonResponse {
-    $datos = $request->validate([
-        'estado' => [
-            'required',
-            'string',
-            Rule::in([
-                'pendiente',
-                'preparando',
-                'listo',
-                'en_camino',
-                'entregado',
-                'cancelado',
-            ]),
-        ],
-        'notas' => ['nullable', 'string', 'max:1000'],
-    ]);
+    public function actualizarEstado(
+        Request $request,
+        string $restaurante,
+        string $pedido
+    ): JsonResponse {
+        $datos = $request->validate([
+            'estado' => [
+                'required',
+                'string',
+                Rule::in([
+                    'pendiente',
+                    'preparando',
+                    'listo',
+                    'en_camino',
+                    'entregado',
+                    'cancelado',
+                ]),
+            ],
+            'notas'  => ['nullable', 'string', 'max:1000'],
+        ]);
 
-    $registro = DB::transaction(function () use (
-        $datos,
-        $restaurante,
-        $pedido,
-        $request
-    ) {
+        $registro = DB::transaction(function () use (
+            $datos,
+            $restaurante,
+            $pedido,
+            $request
+        ) {
+            $registro = Pedido::query()
+                ->where('id_restaurante', $restaurante)
+                ->where('id_pedido', $pedido)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            $estadoActual = $registro->estado;
+            $estadoNuevo  = $datos['estado'];
+
+            $transiciones = [
+                'pendiente'  => ['preparando', 'cancelado'],
+                'preparando' => ['listo', 'cancelado'],
+                'listo'      => $registro->tipo_entrega === 'domicilio'
+                    ? ['en_camino', 'cancelado']
+                    : ['entregado', 'cancelado'],
+                'en_camino'  => ['entregado'],
+                'entregado'  => [],
+                'cancelado'  => [],
+            ];
+
+            $permitidos = $transiciones[$estadoActual] ?? [];
+
+            if (! in_array($estadoNuevo, $permitidos, true)) {
+                throw ValidationException::withMessages([
+                    'estado' => [
+                        "No se puede cambiar el pedido de '{$estadoActual}' a '{$estadoNuevo}'.",
+                    ],
+                ]);
+            }
+
+            $registro->update([
+                'estado' => $estadoNuevo,
+            ]);
+
+            $registro->historialEstados()->create([
+                'id_restaurante'  => (int) $restaurante,
+                'id_cambiado_por' => $request->user()->id_usuario,
+                'estado'          => $estadoNuevo,
+                'notas'           => $datos['notas'] ?? null,
+            ]);
+
+            return $registro->load('detalles', 'historialEstados');
+        });
+
+        return response()->json([
+            'mensaje' => 'Estado del pedido actualizado correctamente.',
+            'pedido'  => $registro,
+        ]);
+    }
+
+    public function historial(
+        string $restaurante,
+        string $pedido
+    ): JsonResponse {
         $registro = Pedido::query()
             ->where('id_restaurante', $restaurante)
             ->where('id_pedido', $pedido)
-            ->lockForUpdate()
             ->firstOrFail();
 
-        $estadoActual = $registro->estado;
-        $estadoNuevo = $datos['estado'];
+        $historial = $registro->historialEstados()
+            ->with('cambiadoPor:id_usuario,nombre')
+            ->orderBy('creado_en')
+            ->get();
 
-        $transiciones = [
-            'pendiente' => ['preparando', 'cancelado'],
-            'preparando' => ['listo', 'cancelado'],
-            'listo' => $registro->tipo_entrega === 'domicilio'
-                ? ['en_camino', 'cancelado']
-                : ['entregado', 'cancelado'],
-            'en_camino' => ['entregado'],
-            'entregado' => [],
-            'cancelado' => [],
-        ];
-
-        $permitidos = $transiciones[$estadoActual] ?? [];
-
-        if (!in_array($estadoNuevo, $permitidos, true)) {
-            throw ValidationException::withMessages([
-                'estado' => [
-                    "No se puede cambiar el pedido de '{$estadoActual}' a '{$estadoNuevo}'.",
-                ],
-            ]);
-        }
-
-        $registro->update([
-            'estado' => $estadoNuevo,
+        return response()->json([
+            'id_pedido' => $registro->id_pedido,
+            'historial' => $historial,
         ]);
-
-        $registro->historialEstados()->create([
-            'id_restaurante' => (int) $restaurante,
-            'id_cambiado_por' => $request->user()->id_usuario,
-            'estado' => $estadoNuevo,
-            'notas' => $datos['notas'] ?? null,
-        ]);
-
-        return $registro->load('detalles', 'historialEstados');
-    });
-
-    return response()->json([
-        'mensaje' => 'Estado del pedido actualizado correctamente.',
-        'pedido' => $registro,
-    ]);
-}
-
-public function historial(
-    string $restaurante,
-    string $pedido
-): JsonResponse {
-    $registro = Pedido::query()
-        ->where('id_restaurante', $restaurante)
-        ->where('id_pedido', $pedido)
-        ->firstOrFail();
-
-    $historial = $registro->historialEstados()
-        ->with('cambiadoPor:id_usuario,nombre')
-        ->orderBy('creado_en')
-        ->get();
-
-    return response()->json([
-        'id_pedido' => $registro->id_pedido,
-        'historial' => $historial,
-    ]);
-}
+    }
 
 }

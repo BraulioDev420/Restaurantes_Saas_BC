@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -8,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Pedido extends Model
 {
+    private ?int $totalPagadoCentavosCache = null;
+
     protected $table = 'pedidos';
 
     protected $primaryKey = 'id_pedido';
@@ -34,9 +35,15 @@ class Pedido extends Model
     ];
 
     protected $casts = [
-        'subtotal' => 'decimal:2',
+        'subtotal'        => 'decimal:2',
         'costo_domicilio' => 'decimal:2',
-        'total' => 'decimal:2',
+        'total'           => 'decimal:2',
+    ];
+
+    protected $appends = [
+        'total_pagado',
+        'saldo_pendiente',
+        'estado_pago',
     ];
 
     public function restaurante(): BelongsTo
@@ -73,6 +80,66 @@ class Pedido extends Model
             'id_pedido',
             'id_pedido'
         );
+    }
+
+    private function obtenerTotalPagadoCentavos(): int
+    {
+        if ($this->totalPagadoCentavosCache !== null) {
+            return $this->totalPagadoCentavosCache;
+        }
+
+        if (array_key_exists('pagos_verificados_sum_monto', $this->attributes)) {
+            $total = $this->attributes['pagos_verificados_sum_monto'];
+        } else {
+            $total = $this->pagos()
+                ->where('estado', 'verificado')
+                ->sum('monto');
+        }
+
+        $this->totalPagadoCentavosCache = (int) round(
+            (float) $total * 100
+        );
+
+        return $this->totalPagadoCentavosCache;
+    }
+
+    public function getTotalPagadoAttribute(): string
+    {
+        return number_format(
+            $this->obtenerTotalPagadoCentavos() / 100,
+            2,
+            '.',
+            ''
+        );
+    }
+
+    public function getSaldoPendienteAttribute(): string
+    {
+        $totalCentavos  = (int) round((float) $this->total * 100);
+        $pagadoCentavos = $this->obtenerTotalPagadoCentavos();
+
+        return number_format(
+            max(0, $totalCentavos - $pagadoCentavos) / 100,
+            2,
+            '.',
+            ''
+        );
+    }
+
+    public function getEstadoPagoAttribute(): string
+    {
+        $totalCentavos  = (int) round((float) $this->total * 100);
+        $pagadoCentavos = $this->obtenerTotalPagadoCentavos();
+
+        if ($pagadoCentavos <= 0) {
+            return 'pendiente';
+        }
+
+        if ($pagadoCentavos >= $totalCentavos) {
+            return 'pagado';
+        }
+
+        return 'parcial';
     }
 
     public function historialEstados(): HasMany

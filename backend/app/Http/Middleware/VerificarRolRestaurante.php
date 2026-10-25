@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Middleware;
 
 use Closure;
@@ -15,15 +14,21 @@ class VerificarRolRestaurante
     ): Response {
         $usuario = $request->user();
 
-        if (!$usuario) {
+        if (! $usuario) {
             return response()->json([
                 'mensaje' => 'No autenticado.',
             ], 401);
         }
 
+        if ($usuario->estado !== 'activo') {
+            return response()->json([
+                'mensaje' => 'Tu cuenta está inactiva.',
+            ], 403);
+        }
+
         $idRestaurante = $request->route('restaurante');
 
-        if (!$idRestaurante) {
+        if (! $idRestaurante) {
             return response()->json([
                 'mensaje' => 'No se especificó el restaurante.',
             ], 400);
@@ -34,7 +39,7 @@ class VerificarRolRestaurante
             ->where('restaurantes.estado', 'activo')
             ->first();
 
-        if (!$restauranteUsuario) {
+        if (! $restauranteUsuario) {
             return response()->json([
                 'mensaje' => 'No tienes acceso a este restaurante.',
             ], 403);
@@ -42,7 +47,7 @@ class VerificarRolRestaurante
 
         $rolUsuario = $restauranteUsuario->pivot->rol;
 
-        if (!in_array($rolUsuario, $rolesPermitidos, true)) {
+        if (! in_array($rolUsuario, $rolesPermitidos, true)) {
             return response()->json([
                 'mensaje' => 'No tienes permisos para realizar esta acción.',
             ], 403);
