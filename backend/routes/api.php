@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CategoriaController;
+use App\Http\Controllers\Api\ProductoController;
 
 Route::get('/estado', function () {
     return response()->json([
@@ -113,6 +114,38 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete(
         '/restaurantes/{restaurante}/categorias/{categoria}',
         [CategoriaController::class, 'destroy']
+    )->middleware('rol.restaurante:administrador');
+
+    
+    // CRUD de productos, protegido por rol y pertenencia al restaurante.
+    Route::get(
+        '/restaurantes/{restaurante}/productos',
+        [ProductoController::class, 'index']
+    )->middleware('rol.restaurante:administrador,empleado,cajero');
+
+    Route::post(
+        '/restaurantes/{restaurante}/productos',
+        [ProductoController::class, 'store']
+    )->middleware('rol.restaurante:administrador');
+
+    Route::get(
+        '/restaurantes/{restaurante}/productos/{producto}',
+        [ProductoController::class, 'show']
+    )->middleware('rol.restaurante:administrador,empleado,cajero');
+
+    Route::put(
+        '/restaurantes/{restaurante}/productos/{producto}',
+        [ProductoController::class, 'update']
+    )->middleware('rol.restaurante:administrador');
+
+    Route::patch(
+        '/restaurantes/{restaurante}/productos/{producto}',
+        [ProductoController::class, 'update']
+    )->middleware('rol.restaurante:administrador');
+
+    Route::delete(
+        '/restaurantes/{restaurante}/productos/{producto}',
+        [ProductoController::class, 'destroy']
     )->middleware('rol.restaurante:administrador');
 
 
