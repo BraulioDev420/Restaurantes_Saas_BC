@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Laravel\Sanctum\HasApiTokens;
 
-class Usuario extends Model
+class Usuario extends Authenticatable
 {
+    use HasApiTokens;
+
     protected $table = 'usuarios';
 
     protected $primaryKey = 'id_usuario';
@@ -28,6 +30,14 @@ class Usuario extends Model
         'contrasena',
     ];
 
+    /**
+     * Indica a Laravel qué campo contiene la contraseña.
+     */
+    public function getAuthPasswordName(): string
+    {
+        return 'contrasena';
+    }
+
     public function restaurantes(): BelongsToMany
     {
         return $this->belongsToMany(
@@ -37,6 +47,10 @@ class Usuario extends Model
             'id_restaurante',
             'id_usuario',
             'id_restaurante'
-        )->withPivot('id_restaurante_usuario', 'rol', 'creado_en');
+        )->withPivot(
+            'id_restaurante_usuario',
+            'rol',
+            'creado_en'
+        );
     }
 }
