@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\CategoriaController;
 
 Route::get('/estado', function () {
     return response()->json([
@@ -80,5 +81,39 @@ Route::middleware('auth:sanctum')->group(function () {
         AuthController::class,
         'logout',
     ]);
+
+
+    
+    // CRUD de categorías, protegido por rol y pertenencia al restaurante.
+    Route::get(
+        '/restaurantes/{restaurante}/categorias',
+        [CategoriaController::class, 'index']
+    )->middleware('rol.restaurante:administrador,empleado,cajero');
+
+    Route::post(
+        '/restaurantes/{restaurante}/categorias',
+        [CategoriaController::class, 'store']
+    )->middleware('rol.restaurante:administrador');
+
+    Route::get(
+        '/restaurantes/{restaurante}/categorias/{categoria}',
+        [CategoriaController::class, 'show']
+    )->middleware('rol.restaurante:administrador,empleado,cajero');
+
+    Route::put(
+        '/restaurantes/{restaurante}/categorias/{categoria}',
+        [CategoriaController::class, 'update']
+    )->middleware('rol.restaurante:administrador');
+
+    Route::patch(
+        '/restaurantes/{restaurante}/categorias/{categoria}',
+        [CategoriaController::class, 'update']
+    )->middleware('rol.restaurante:administrador');
+
+    Route::delete(
+        '/restaurantes/{restaurante}/categorias/{categoria}',
+        [CategoriaController::class, 'destroy']
+    )->middleware('rol.restaurante:administrador');
+
 
 });
