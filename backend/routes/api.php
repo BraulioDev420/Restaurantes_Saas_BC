@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\ProductoController;
 use App\Http\Controllers\Api\ReporteController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\UsuarioController;
 
 Route::get('/estado', function () {
     return response()->json([
@@ -27,6 +28,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
+
 
     Route::get('/usuario', [
         AuthController::class,
@@ -262,4 +264,35 @@ Route::middleware('auth:sanctum')->group(function () {
         [ReporteController::class, 'resumen']
     )->middleware('rol.restaurante:administrador');
 
+
+        // Gestión de usuarios del restaurante: solo administradores.
+    Route::middleware('rol.restaurante:administrador')->group(function () {
+        Route::get(
+            '/restaurantes/{restaurante}/usuarios',
+            [UsuarioController::class, 'index']
+        );
+
+        Route::post(
+            '/restaurantes/{restaurante}/usuarios',
+            [UsuarioController::class, 'store']
+        );
+
+        Route::put(
+            '/restaurantes/{restaurante}/usuarios/{usuario}',
+            [UsuarioController::class, 'update']
+        );
+
+        Route::patch(
+            '/restaurantes/{restaurante}/usuarios/{usuario}',
+            [UsuarioController::class, 'update']
+        );
+
+        Route::delete(
+            '/restaurantes/{restaurante}/usuarios/{usuario}',
+            [UsuarioController::class, 'destroy']
+        );
+    });
+
+
+    
 });
