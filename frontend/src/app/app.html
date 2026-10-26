@@ -1,0 +1,262 @@
+
+<div class="page">
+  <header class="topbar">
+    <a class="brand" href="/">
+      <span class="brand-icon">S</span>
+      <span>Saborea<span class="brand-dot">.</span></span>
+    </a>
+
+    <button class="cart-button" (click)="mostrarCarrito = !mostrarCarrito">
+      <span>🛒</span>
+      Mi pedido
+      <span class="cart-count">{{ cantidadArticulos }}</span>
+    </button>
+  </header>
+
+  <main>
+    <section class="hero" *ngIf="menu">
+      <div class="hero-content">
+        <span class="eyebrow">HECHO PARA DISFRUTAR</span>
+        <h1>{{ menu.restaurante.nombre }}</h1>
+        <p>{{ menu.restaurante.descripcion || 'Descubre nuestros sabores y pide tus favoritos.' }}</p>
+        <div class="hero-meta">
+          <span>✦ Menú digital</span>
+          <span *ngIf="menu.restaurante.telefono">☎ {{ menu.restaurante.telefono }}</span>
+        </div>
+      </div>
+      <div class="hero-art" aria-hidden="true">🍔</div>
+    </section>
+
+    <div *ngIf="cargando" class="state-panel">
+      <div class="spinner"></div>
+      <p>Cargando el menú...</p>
+    </div>
+
+    <div *ngIf="error && !menu" class="state-panel error-panel">
+      <h2>No pudimos abrir el menú</h2>
+      <p>{{ error }}</p>
+      <button class="primary-button" (click)="cargarMenu()">Intentar de nuevo</button>
+    </div>
+
+    <section *ngIf="menu && !cargando" class="menu-section">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">NUESTRO MENÚ</span>
+          <h2>¿Qué se te antoja?</h2>
+        </div>
+        <label class="search-box">
+          <span>⌕</span>
+          <input
+            type="search"
+            [(ngModel)]="busqueda"
+            placeholder="Buscar platos..."
+            aria-label="Buscar platos"
+          />
+        </label>
+      </div>
+
+      <nav class="categories" aria-label="Categorías del menú">
+        <button
+          [class.active]="categoriaSeleccionada === null"
+          (click)="seleccionarCategoria(null)">
+          Todo el menú
+        </button>
+        <button
+          *ngFor="let categoria of menu.categorias"
+          [class.active]="categoriaSeleccionada === categoria.id_categoria"
+          (click)="seleccionarCategoria(categoria.id_categoria)">
+          {{ categoria.nombre }}
+        </button>
+      </nav>
+
+      <div *ngIf="categoriasVisibles.length === 0" class="empty-state">
+        No encontramos productos con esa búsqueda.
+      </div>
+
+      <section *ngFor="let categoria of categoriasVisibles" class="category-block">
+        <div class="category-heading">
+          <div>
+            <h3>{{ categoria.nombre }}</h3>
+            <p *ngIf="categoria.descripcion">{{ categoria.descripcion }}</p>
+          </div>
+          <span>{{ categoria.productos.length }} productos</span>
+        </div>
+
+        <div class="product-grid">
+          <article class="product-card" *ngFor="let producto of categoria.productos">
+            <div class="product-image">
+              <img
+                *ngIf="producto.imagen_url"
+                [src]="producto.imagen_url"
+                [alt]="producto.nombre"
+                loading="lazy"
+              />
+              <span *ngIf="!producto.imagen_url" class="food-placeholder">🍽️</span>
+            </div>
+
+            <div class="product-info">
+              <h4>{{ producto.nombre }}</h4>
+              <p>{{ producto.descripcion || 'Preparado para disfrutar.' }}</p>
+
+              <div class="product-footer">
+                <strong>{{ Number(producto.precio) | currency:'COP':'symbol-narrow':'1.0-0' }}</strong>
+                <button
+                  class="add-button"
+                  (click)="agregar(producto)"
+                  [attr.aria-label]="'Agregar ' + producto.nombre">
+                  +
+                </button>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+    </section>
+
+    <section *ngIf="mensaje && pedidoCreado" class="success-panel">
+      <span class="success-icon">✓</span>
+      <div>
+        <h2>¡Pedido recibido!</h2>
+        <p>{{ mensaje }}</p>
+        <p>
+          Número de pedido:
+          <strong>{{ pedidoCreado.numero_pedido }}</strong>
+        </p>
+        <p>
+          Total:
+          <strong>{{ Number(pedidoCreado.total) | currency:'COP':'symbol-narrow':'1.0-0' }}</strong>
+        </p>
+        <p class="muted">Estado: {{ pedidoCreado.estado }}</p>
+      </div>
+      <button class="secondary-button" (click)="mensaje = ''; pedidoCreado = null">
+        Volver al menú
+      </button>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span>Saborea<span class="brand-dot">.</span></span>
+    <span>Menú digital · Pedidos en línea</span>
+  </footer>
+</div>
+
+<div class="overlay" *ngIf="mostrarCarrito" (click)="mostrarCarrito = false"></div>
+
+<aside class="cart-drawer" [class.open]="mostrarCarrito" aria-label="Tu pedido">
+  <div class="drawer-header">
+    <div>
+      <span class="eyebrow">TU SELECCIÓN</span>
+      <h2>Mi pedido</h2>
+    </div>
+    <button class="close-button" (click)="mostrarCarrito = false" aria-label="Cerrar">×</button>
+  </div>
+
+  <div class="cart-content">
+    <div *ngIf="carrito.length === 0" class="empty-cart">
+      <span>🛍️</span>
+      <h3>Tu carrito está vacío</h3>
+      <p>Agrega tus platos favoritos para comenzar.</p>
+      <button class="primary-button" (click)="mostrarCarrito = false">Explorar menú</button>
+    </div>
+
+    <div *ngFor="let item of carrito" class="cart-item">
+      <div class="cart-item-main">
+        <div>
+          <h3>{{ item.producto.nombre }}</h3>
+          <p>{{ Number(item.producto.precio) | currency:'COP':'symbol-narrow':'1.0-0' }} c/u</p>
+        </div>
+        <button class="remove-button" (click)="quitar(item)" aria-label="Eliminar producto">×</button>
+      </div>
+
+      <div class="cart-item-bottom">
+        <div class="quantity-control">
+          <button (click)="cambiarCantidad(item, -1)" aria-label="Restar">−</button>
+          <span>{{ item.cantidad }}</span>
+          <button (click)="cambiarCantidad(item, 1)" aria-label="Sumar">+</button>
+        </div>
+        <strong>{{ Number(item.producto.precio) * item.cantidad | currency:'COP':'symbol-narrow':'1.0-0' }}</strong>
+      </div>
+
+      <input
+        class="observation-input"
+        [(ngModel)]="item.observaciones"
+        placeholder="Observaciones (opcional)"
+        [attr.aria-label]="'Observaciones para ' + item.producto.nombre"
+      />
+    </div>
+
+    <form *ngIf="carrito.length > 0" class="checkout-form" (ngSubmit)="finalizarPedido()">
+      <h3>Datos para tu pedido</h3>
+
+      <label>
+        Nombre completo *
+        <input name="nombre" [(ngModel)]="cliente.nombre_cliente" required maxlength="150" />
+      </label>
+
+      <label>
+        Teléfono *
+        <input
+          name="telefono"
+          [(ngModel)]="cliente.telefono_cliente"
+          required
+          maxlength="30"
+          autocomplete="tel"
+        />
+      </label>
+
+      <label>
+        Correo electrónico (opcional)
+        <input
+          type="email"
+          name="correo"
+          [(ngModel)]="cliente.correo_cliente"
+          maxlength="150"
+          autocomplete="email"
+        />
+      </label>
+
+      <label>
+        Tipo de entrega *
+        <select name="entrega" [(ngModel)]="cliente.tipo_entrega" required>
+          <option value="domicilio">Domicilio</option>
+          <option value="recoger">Recoger en el restaurante</option>
+          <option value="mesa">Consumir en mesa</option>
+        </select>
+      </label>
+
+      <label *ngIf="cliente.tipo_entrega === 'domicilio'">
+        Dirección de entrega *
+        <input
+          name="direccion"
+          [(ngModel)]="cliente.direccion_entrega"
+          required
+          maxlength="255"
+          autocomplete="street-address"
+        />
+      </label>
+
+      <label>
+        Notas del pedido (opcional)
+        <textarea
+          name="notas"
+          [(ngModel)]="cliente.notas"
+          rows="2"
+          maxlength="1000"
+          placeholder="Indicaciones adicionales..."
+        ></textarea>
+      </label>
+
+      <div class="checkout-total">
+        <span>Subtotal</span>
+        <strong>{{ subtotal | currency:'COP':'symbol-narrow':'1.0-0' }}</strong>
+      </div>
+      <p class="delivery-note">El costo de domicilio se confirmará según la configuración del restaurante.</p>
+
+      <p *ngIf="error" class="form-error" role="alert">{{ error }}</p>
+
+      <button class="primary-button submit-button" type="submit" [disabled]="enviando">
+        {{ enviando ? 'Enviando pedido...' : 'Confirmar pedido' }}
+      </button>
+    </form>
+  </div>
+</aside>
