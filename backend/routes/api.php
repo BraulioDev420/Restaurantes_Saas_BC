@@ -4,13 +4,15 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CategoriaController;
 use App\Http\Controllers\Api\ClienteController;
 use App\Http\Controllers\Api\GastoController;
+use App\Http\Controllers\Api\MenuPublicoController;
 use App\Http\Controllers\Api\PagoController;
 use App\Http\Controllers\Api\PedidoController;
 use App\Http\Controllers\Api\ProductoController;
 use App\Http\Controllers\Api\ReporteController;
+use App\Http\Controllers\Api\UsuarioController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\UsuarioController;
+use App\Http\Controllers\Api\PedidoPublicoController;
 
 Route::get('/estado', function () {
     return response()->json([
@@ -19,8 +21,18 @@ Route::get('/estado', function () {
     ]);
 });
 
+
 Route::post('/login', [AuthController::class, 'login'])
     ->middleware('throttle:5,1');
+
+Route::get(
+    '/menu/{slug}',
+    [MenuPublicoController::class, 'mostrar']
+);
+Route::post(
+    '/pedido-publico/{slug}',
+    [PedidoPublicoController::class, 'store']
+)->middleware('throttle:10,1');
 
 Route::middleware('auth:sanctum')->group(function () {
 
@@ -28,7 +40,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
-
 
     Route::get('/usuario', [
         AuthController::class,
@@ -264,8 +275,7 @@ Route::middleware('auth:sanctum')->group(function () {
         [ReporteController::class, 'resumen']
     )->middleware('rol.restaurante:administrador');
 
-
-        // Gestión de usuarios del restaurante: solo administradores.
+    // Gestión de usuarios del restaurante: solo administradores.
     Route::middleware('rol.restaurante:administrador')->group(function () {
         Route::get(
             '/restaurantes/{restaurante}/usuarios',
@@ -293,6 +303,4 @@ Route::middleware('auth:sanctum')->group(function () {
         );
     });
 
-
-    
 });
