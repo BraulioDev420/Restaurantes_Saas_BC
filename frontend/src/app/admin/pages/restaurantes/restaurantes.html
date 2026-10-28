@@ -1,0 +1,143 @@
+
+<div class="page">
+  <section class="page-heading">
+    <div>
+      <span class="eyebrow">ADMINISTRACIÓN GLOBAL</span>
+      <h2>Restaurantes</h2>
+      <p>Consulta y supervisa los restaurantes registrados en Saborea.</p>
+    </div>
+
+    <a routerLink="/admin/restaurantes/nuevo" class="primary-button">
+      <span>＋</span> Nuevo restaurante
+    </a>
+  </section>
+
+  <section class="summary-grid">
+    <article class="summary-card">
+      <span>Total de restaurantes</span>
+      <strong>{{ restaurantes.length }}</strong>
+    </article>
+
+    <article class="summary-card">
+      <span>Activos</span>
+      <strong class="green-text">{{ totalActivos }}</strong>
+    </article>
+
+    <article class="summary-card">
+      <span>Suspendidos</span>
+      <strong class="orange-text">{{ totalSuspendidos }}</strong>
+    </article>
+  </section>
+
+  <section class="table-card">
+    <div class="table-heading">
+      <div>
+        <h3>Directorio de restaurantes</h3>
+        <p>{{ restaurantesFiltrados.length }} resultado(s)</p>
+      </div>
+    </div>
+
+    <div class="filters">
+      <label class="search-box">
+        <span>⌕</span>
+        <input
+          type="search"
+          [(ngModel)]="busqueda"
+          placeholder="Buscar por nombre, slug o administrador..."
+          aria-label="Buscar restaurantes"
+        />
+      </label>
+
+      <select
+        [(ngModel)]="filtroEstado"
+        aria-label="Filtrar por estado"
+      >
+        <option value="Todos">Todos los estados</option>
+        <option value="Activo">Activos</option>
+        <option value="Suspendido">Suspendidos</option>
+      </select>
+    </div>
+
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>RESTAURANTE</th>
+            <th>ADMINISTRADOR</th>
+            <th>FECHA DE REGISTRO</th>
+            <th>ESTADO</th>
+            <th>MENÚ PÚBLICO</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let restaurante of restaurantesFiltrados">
+            <td>
+              <div class="restaurant-name">
+                <span class="restaurant-avatar">
+                  {{ restaurante.nombre.charAt(0) }}
+                </span>
+
+                <div>
+                  <strong>{{ restaurante.nombre }}</strong>
+                  <small>{{ restaurante.slug }}</small>
+                </div>
+              </div>
+            </td>
+
+            <td>
+              <div class="admin-info">
+                <strong>{{ restaurante.administrador }}</strong>
+                <small>{{ restaurante.correo }}</small>
+              </div>
+            </td>
+
+            <td>{{ restaurante.fecha | date:'dd/MM/yyyy' }}</td>
+
+            <td>
+              <span
+                class="status"
+                [class.active]="restaurante.estado === 'Activo'"
+                [class.suspended]="restaurante.estado === 'Suspendido'"
+              >
+                <span class="status-dot"></span>
+                {{ restaurante.estado }}
+              </span>
+            </td>
+
+            <td>
+              <a
+                class="menu-link"
+                [href]="'/' + restaurante.slug"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Ver menú ↗
+              </a>
+            </td>
+          </tr>
+
+          <tr *ngIf="restaurantesFiltrados.length === 0">
+            <td colspan="5">
+              <div class="empty-state">
+                <span>⌕</span>
+                <strong>No encontramos restaurantes</strong>
+                <p>Prueba con otro término o cambia el filtro de estado.</p>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <footer class="table-footer">
+      Mostrando {{ restaurantesFiltrados.length }} de
+      {{ restaurantes.length }} restaurantes
+    </footer>
+  </section>
+
+  <p class="demo-notice">
+    Estos registros son de demostración. Los cambios y la información real
+    se incorporarán cuando conectemos el módulo con Laravel y MySQL.
+  </p>
+</div>

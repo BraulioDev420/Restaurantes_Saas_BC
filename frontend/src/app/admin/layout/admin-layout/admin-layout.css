@@ -1,0 +1,181 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  color: #20251f;
+}
+
+.admin-layout {
+  display: flex;
+  min-height: 100vh;
+  background: #f6f7f4;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  width: 250px;
+  flex-shrink: 0;
+  padding: 28px 18px;
+  background: #183c2c;
+  color: #fff;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 8px 32px;
+}
+
+.brand-icon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: #d5f36a;
+  color: #183c2c;
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.brand h2 {
+  margin: 0;
+  font-size: 22px;
+}
+
+.brand small,
+.user-profile small {
+  display: block;
+  margin-top: 4px;
+  opacity: 0.72;
+}
+
+.navigation {
+  display: grid;
+  gap: 8px;
+}
+
+.navigation a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 14px;
+  border-radius: 10px;
+  color: #e1e9e2;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+
+.navigation a:hover,
+.navigation a.active {
+  background: #2b5941;
+  color: #fff;
+}
+
+.navigation a span {
+  width: 20px;
+  text-align: center;
+  font-size: 18px;
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  padding: 18px 8px 0;
+  color: #d5e1d7;
+  font-size: 12px;
+}
+
+.status-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 7px;
+  border-radius: 50%;
+  background: #d5f36a;
+}
+
+.main-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 25px 36px;
+  background: #fff;
+  border-bottom: 1px solid #e8ebe5;
+}
+
+.eyebrow {
+  color: #718074;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+}
+
+.topbar h1 {
+  margin: 7px 0 0;
+  font-size: 25px;
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+}
+
+.user-profile small {
+  color: #718074;
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #e5eedf;
+  color: #183c2c;
+  font-weight: 800;
+}
+
+.page-content {
+  padding: 32px 36px;
+}
+
+@media (max-width: 760px) {
+  .admin-layout {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: auto;
+    padding: 18px;
+  }
+
+  .brand {
+    padding-bottom: 18px;
+  }
+
+  .navigation {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .topbar {
+    align-items: flex-start;
+    padding: 22px 18px;
+  }
+
+  .user-profile {
+    display: none;
+  }
+
+  .page-content {
+    padding: 22px 18px;
+  }
+}

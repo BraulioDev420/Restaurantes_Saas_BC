@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -24,26 +23,31 @@ class PedidoPublicoController extends Controller
         $restauranteId = (int) $restaurante->id_restaurante;
 
         $datos = $request->validate([
-            'nombre_cliente' => ['required', 'string', 'max:150'],
-            'telefono_cliente' => ['required', 'string', 'max:30'],
-            'correo_cliente' => ['nullable', 'email', 'max:150'],
+            'nombre_cliente'           => ['required', 'string', 'max:150'],
+            'telefono_cliente'         => [
+                'required',
+                'string',
+                'regex:/^[0-9]{7,15}$/',
+                'max:15',
+            ],
+            'correo_cliente'           => ['nullable', 'email', 'max:150'],
 
-            'tipo_entrega' => [
+            'tipo_entrega'             => [
                 'required',
                 Rule::in(['domicilio', 'recoger', 'mesa']),
             ],
 
-            'direccion_entrega' => [
+            'direccion_entrega'        => [
                 'nullable',
                 'string',
                 'max:255',
             ],
 
-            'notas' => ['nullable', 'string', 'max:1000'],
+            'notas'                    => ['nullable', 'string', 'max:1000'],
 
-            'detalles' => ['required', 'array', 'min:1', 'max:50'],
+            'detalles'                 => ['required', 'array', 'min:1', 'max:50'],
 
-            'detalles.*.id_producto' => [
+            'detalles.*.id_producto'   => [
                 'required',
                 'integer',
                 'distinct',
@@ -52,7 +56,7 @@ class PedidoPublicoController extends Controller
                     ->where('disponible', true),
             ],
 
-            'detalles.*.cantidad' => [
+            'detalles.*.cantidad'      => [
                 'required',
                 'integer',
                 'min:1',
@@ -122,26 +126,26 @@ class PedidoPublicoController extends Controller
 
             // No se acepta el costo de domicilio del cliente.
             // Por ahora es cero hasta configurar una tarifa del restaurante.
-            $costoDomicilioCentavos = 0;
+            $costoDomicilioCentavos  = 0;
 
             $pedido = Pedido::create([
-                'id_restaurante' => $restauranteId,
-                'id_cliente' => null,
-                'numero_pedido' => 'PED-' . bin2hex(random_bytes(8)),
-                'nombre_cliente' => $datos['nombre_cliente'],
-                'telefono_cliente' => $datos['telefono_cliente'],
-                'correo_cliente' => $datos['correo_cliente'] ?? null,
-                'tipo_entrega' => $datos['tipo_entrega'],
+                'id_restaurante'    => $restauranteId,
+                'id_cliente'        => null,
+                'numero_pedido'     => 'PED-' . bin2hex(random_bytes(8)),
+                'nombre_cliente'    => $datos['nombre_cliente'],
+                'telefono_cliente'  => $datos['telefono_cliente'],
+                'correo_cliente'    => $datos['correo_cliente'] ?? null,
+                'tipo_entrega'      => $datos['tipo_entrega'],
                 'direccion_entrega' =>
-                    $datos['direccion_entrega'] ?? null,
-                'notas' => $datos['notas'] ?? null,
-                'subtotal' => $subtotalCentavos / 100,
-                'costo_domicilio' =>
-                    $costoDomicilioCentavos / 100,
-                'total' => (
+                $datos['direccion_entrega'] ?? null,
+                'notas'             => $datos['notas'] ?? null,
+                'subtotal'          => $subtotalCentavos / 100,
+                'costo_domicilio'   =>
+                $costoDomicilioCentavos / 100,
+                'total'             => (
                     $subtotalCentavos + $costoDomicilioCentavos
                 ) / 100,
-                'estado' => 'pendiente',
+                'estado'            => 'pendiente',
             ]);
 
             foreach ($datos['detalles'] as $detalle) {
@@ -156,16 +160,16 @@ class PedidoPublicoController extends Controller
                 );
 
                 $pedido->detalles()->create([
-                    'id_restaurante' => $restauranteId,
-                    'id_producto' => $producto->id_producto,
+                    'id_restaurante'  => $restauranteId,
+                    'id_producto'     => $producto->id_producto,
                     'nombre_producto' => $producto->nombre,
-                    'cantidad' => $cantidad,
+                    'cantidad'        => $cantidad,
                     'precio_unitario' => $precioCentavos / 100,
-                    'subtotal' => (
+                    'subtotal'        => (
                         $precioCentavos * $cantidad
                     ) / 100,
-                    'observaciones' =>
-                        $detalle['observaciones'] ?? null,
+                    'observaciones'   =>
+                    $detalle['observaciones'] ?? null,
                 ]);
             }
 
@@ -174,7 +178,7 @@ class PedidoPublicoController extends Controller
 
         return response()->json([
             'mensaje' => 'Pedido creado correctamente.',
-            'pedido' => $pedido->load('detalles'),
+            'pedido'  => $pedido->load('detalles'),
         ], 201);
     }
 }

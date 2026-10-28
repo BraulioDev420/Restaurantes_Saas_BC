@@ -1,0 +1,65 @@
+<div class="dashboard">
+  <section class="welcome">
+    <div>
+      <span class="eyebrow">RESUMEN GENERAL</span>
+      <h2>Bienvenido al centro de control</h2>
+      <p>Desde aquí podrás supervisar los restaurantes registrados en Saborea.</p>
+    </div>
+
+    <a routerLink="/admin/restaurantes/nuevo" class="primary-button">
+      + Crear restaurante
+    </a>
+  </section>
+
+  <section class="stats-grid">
+    <article class="stat-card">
+      <div class="stat-icon green">▤</div>
+      <span class="stat-label">Restaurantes registrados</span>
+      <strong>0</strong>
+      <small>Total de restaurantes</small>
+    </article>
+
+    <article class="stat-card">
+      <div class="stat-icon blue">✓</div>
+      <span class="stat-label">Restaurantes activos</span>
+      <strong>0</strong>
+      <small>Disponibles al público</small>
+    </article>
+
+    <article class="stat-card">
+      <div class="stat-icon orange">Ⅱ</div>
+      <span class="stat-label">Restaurantes suspendidos</span>
+      <strong>0</strong>
+      <small>Temporalmente deshabilitados</small>
+    </article>
+
+    <article class="stat-card">
+      <div class="stat-icon purple">♙</div>
+      <span class="stat-label">Administradores</span>
+      <strong>0</strong>
+      <small>Usuarios administradores</small>
+    </article>
+  </section>
+
+  <section class="content-card">
+    <div class="section-heading">
+      <div>
+        <h3>Restaurantes recientes</h3>
+        <p>Vista rápida de los restaurantes registrados.</p>
+      </div>
+
+      <a routerLink="/admin/restaurantes" class="secondary-button">
+        Ver restaurantes →
+      </a>
+    </div>
+
+    <div class="empty-state">
+      <div class="empty-icon">▤</div>
+      <h4>Aún no hay restaurantes para mostrar</h4>
+      <p>Cuando conectemos este panel con Laravel, aparecerán aquí los restaurantes registrados.</p>
+      <a routerLink="/admin/restaurantes/nuevo" class="primary-button">
+        Registrar primer restaurante
+      </a>
+    </div>
+  </section>
+</div>

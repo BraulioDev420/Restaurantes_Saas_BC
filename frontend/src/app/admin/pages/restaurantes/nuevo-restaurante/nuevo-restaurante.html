@@ -1,0 +1,192 @@
+
+<div class="page">
+  <div class="page-heading">
+    <div>
+      <a routerLink="/admin/restaurantes" class="back-link">
+        ← Volver a restaurantes
+      </a>
+
+      <span class="eyebrow">ADMINISTRACIÓN GLOBAL</span>
+      <h2>Registrar restaurante</h2>
+      <p>Crea el perfil del negocio y su cuenta de administración.</p>
+    </div>
+  </div>
+
+  <form #formulario="ngForm" (ngSubmit)="guardar()" class="restaurant-form">
+    <section class="form-card">
+      <div class="section-title">
+        <span class="section-number">01</span>
+        <div>
+          <h3>Información del restaurante</h3>
+          <p>Datos que identificarán al negocio en Saborea.</p>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <label class="field full">
+          <span>Nombre del restaurante *</span>
+          <input
+            type="text"
+            name="nombre"
+            [(ngModel)]="restaurante.nombre"
+            (ngModelChange)="generarSlug()"
+            required
+            maxlength="120"
+            placeholder="Ej. Sabores del Caribe"
+          />
+        </label>
+
+        <label class="field">
+          <span>Slug del menú público *</span>
+          <div class="slug-input">
+            <span>/</span>
+            <input
+              type="text"
+              name="slug"
+              [(ngModel)]="restaurante.slug"
+              required
+              pattern="[a-z0-9]+(-[a-z0-9]+)*"
+              maxlength="100"
+              placeholder="sabores-del-caribe"
+            />
+          </div>
+          <small>Se usará en la dirección pública del menú.</small>
+        </label>
+
+        <label class="field">
+          <span>Teléfono del restaurante</span>
+          <input
+            type="tel"
+            name="telefono"
+            [(ngModel)]="restaurante.telefono"
+            maxlength="20"
+            placeholder="Ej. 3001234567"
+          />
+        </label>
+
+        <label class="field">
+          <span>Correo de contacto</span>
+          <input
+            type="email"
+            name="correo"
+            [(ngModel)]="restaurante.correo"
+            email
+            placeholder="contacto@restaurante.com"
+          />
+        </label>
+
+        <label class="field">
+          <span>Dirección</span>
+          <input
+            type="text"
+            name="direccion"
+            [(ngModel)]="restaurante.direccion"
+            maxlength="255"
+            placeholder="Dirección del establecimiento"
+          />
+        </label>
+
+        <label class="field full">
+          <span>Descripción</span>
+          <textarea
+            name="descripcion"
+            [(ngModel)]="restaurante.descripcion"
+            rows="3"
+            maxlength="1000"
+            placeholder="Describe brevemente el restaurante..."
+          ></textarea>
+        </label>
+      </div>
+    </section>
+
+    <section class="form-card">
+      <div class="section-title">
+        <span class="section-number">02</span>
+        <div>
+          <h3>Administrador del restaurante</h3>
+          <p>Cuenta que se utilizará para acceder al panel del negocio.</p>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <label class="field full">
+          <span>Nombre del administrador *</span>
+          <input
+            type="text"
+            name="nombreAdministrador"
+            [(ngModel)]="restaurante.nombreAdministrador"
+            required
+            maxlength="120"
+            placeholder="Nombre completo"
+          />
+        </label>
+
+        <label class="field full">
+          <span>Correo de inicio de sesión *</span>
+          <input
+            type="email"
+            name="correoAdministrador"
+            [(ngModel)]="restaurante.correoAdministrador"
+            required
+            email
+            maxlength="255"
+            placeholder="administrador@restaurante.com"
+          />
+        </label>
+
+        <label class="field">
+          <span>Contraseña inicial *</span>
+          <input
+            type="password"
+            name="contrasena"
+            [(ngModel)]="restaurante.contrasena"
+            required
+            minlength="8"
+            autocomplete="new-password"
+            placeholder="Mínimo 8 caracteres"
+          />
+        </label>
+
+        <label class="field">
+          <span>Confirmar contraseña *</span>
+          <input
+            type="password"
+            name="confirmarContrasena"
+            [(ngModel)]="restaurante.confirmarContrasena"
+            required
+            minlength="8"
+            autocomplete="new-password"
+            placeholder="Repite la contraseña"
+          />
+        </label>
+      </div>
+
+      <p class="security-note">
+        La contraseña se deberá almacenar con hash en el servidor, nunca como
+        texto plano. La creación real de la cuenta se hará desde Laravel.
+      </p>
+    </section>
+
+    <div *ngIf="error" class="alert error" role="alert">
+      {{ error }}
+    </div>
+
+    <div *ngIf="mensaje" class="alert success" role="status">
+      {{ mensaje }}
+    </div>
+
+    <div class="form-actions">
+      <a routerLink="/admin/restaurantes" class="cancel-button">
+        Cancelar
+      </a>
+
+      <button
+        type="submit"
+        class="submit-button"
+        [disabled]="formulario.invalid || guardando"
+      >
+        {{ guardando ? 'Guardando...' : 'Validar formulario' }}
+      </button>
+    </div>
+  </form>
+</div>
