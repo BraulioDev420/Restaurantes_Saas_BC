@@ -12,7 +12,11 @@
     </div>
   </div>
 
-  <form #formulario="ngForm" (ngSubmit)="guardar()" class="restaurant-form">
+  <form
+    #formulario="ngForm"
+    (ngSubmit)="guardar()"
+    class="restaurant-form"
+  >
     <section class="form-card">
       <div class="section-title">
         <span class="section-number">01</span>
@@ -162,17 +166,17 @@
       </div>
 
       <p class="security-note">
-        La contraseña se deberá almacenar con hash en el servidor, nunca como
-        texto plano. La creación real de la cuenta se hará desde Laravel.
+        La contraseña se envía al servidor y se almacena con hash.
+        Nunca se guarda como texto plano.
       </p>
     </section>
 
-    <div *ngIf="error" class="alert error" role="alert">
-      {{ error }}
+    <div *ngIf="error()" class="alert error" role="alert">
+      {{ error() }}
     </div>
 
-    <div *ngIf="mensaje" class="alert success" role="status">
-      {{ mensaje }}
+    <div *ngIf="mensaje()" class="alert success" role="status">
+      {{ mensaje() }}
     </div>
 
     <div class="form-actions">
@@ -183,9 +187,9 @@
       <button
         type="submit"
         class="submit-button"
-        [disabled]="formulario.invalid || guardando"
+        [disabled]="formulario.invalid || guardando()"
       >
-        {{ guardando ? 'Guardando...' : 'Validar formulario' }}
+        {{ guardando() ? 'Creando restaurante...' : 'Crear restaurante' }}
       </button>
     </div>
   </form>

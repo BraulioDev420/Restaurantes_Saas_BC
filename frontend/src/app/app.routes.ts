@@ -1,4 +1,6 @@
+
 import { Routes } from '@angular/router';
+import { superadminGuard } from './auth/superadmin-guard';
 
 export const routes: Routes = [
   {
@@ -7,9 +9,18 @@ export const routes: Routes = [
     redirectTo: 'restaurante-prueba'
   },
 
-  // Superadministrador
+  // Inicio de sesión del superadministrador
+  {
+    path: 'login',
+    loadComponent: () =>
+      import('./auth/login/login')
+        .then(m => m.LoginComponent)
+  },
+
+  // Panel del superadministrador
   {
     path: 'admin',
+    canActivate: [superadminGuard],
     loadComponent: () =>
       import('./admin/layout/admin-layout/admin-layout')
         .then(m => m.AdminLayout),

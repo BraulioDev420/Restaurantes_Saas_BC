@@ -1,4 +1,3 @@
-
 <div class="page">
   <section class="page-heading">
     <div>
@@ -12,10 +11,11 @@
     </a>
   </section>
 
+  <!-- Resumen -->
   <section class="summary-grid">
     <article class="summary-card">
       <span>Total de restaurantes</span>
-      <strong>{{ restaurantes.length }}</strong>
+      <strong>{{ restaurantes().length }}</strong>
     </article>
 
     <article class="summary-card">
@@ -29,115 +29,133 @@
     </article>
   </section>
 
+  <!-- Directorio -->
   <section class="table-card">
     <div class="table-heading">
       <div>
         <h3>Directorio de restaurantes</h3>
         <p>{{ restaurantesFiltrados.length }} resultado(s)</p>
       </div>
+
+      <button type="button" class="primary-button" (click)="cargarRestaurantes()" [disabled]="cargando()">
+        {{ cargando() ? 'Actualizando...' : 'Actualizar' }}
+      </button>
     </div>
 
+    <!-- Búsqueda y filtros -->
     <div class="filters">
       <label class="search-box">
         <span>⌕</span>
-        <input
-          type="search"
-          [(ngModel)]="busqueda"
-          placeholder="Buscar por nombre, slug o administrador..."
-          aria-label="Buscar restaurantes"
-        />
+        <input type="search" [(ngModel)]="busqueda" placeholder="Buscar por nombre, slug o administrador..."
+          aria-label="Buscar restaurantes" />
       </label>
 
-      <select
-        [(ngModel)]="filtroEstado"
-        aria-label="Filtrar por estado"
-      >
+      <select [(ngModel)]="filtroEstado" aria-label="Filtrar por estado">
         <option value="Todos">Todos los estados</option>
         <option value="Activo">Activos</option>
         <option value="Suspendido">Suspendidos</option>
       </select>
     </div>
+    <div *ngIf="mensaje()" class="success-message" role="status">
+      {{ mensaje() }}
+    </div>
 
-    <div class="table-scroll">
+    <div *ngIf="error()" class="error" role="alert">
+      {{ error() }}
+    </div>
+    <!-- Cargando -->
+    <div *ngIf="cargando()" class="empty-state" role="status">
+      <p>Cargando restaurantes...</p>
+    </div>
+
+    <!-- Error -->
+    <div *ngIf="!cargando() && error()" class="error" role="alert">
+      <p>{{ error() }}</p>
+
+      <button type="button" class="primary-button" (click)="cargarRestaurantes()">
+        Reintentar
+      </button>
+    </div>
+
+    <!-- Sin resultados -->
+    <div *ngIf="
+        !cargando() &&
+        !error() &&
+        restaurantesFiltrados.length === 0
+      " class="empty-state">
+      <h3>No se encontraron restaurantes</h3>
+      <p>
+        {{
+        busqueda.trim() || filtroEstado !== 'Todos'
+        ? 'Prueba cambiando la búsqueda o el filtro.'
+        : 'Todavía no hay restaurantes registrados en Saborea.'
+        }}
+      </p>
+    </div>
+
+    <!-- Tabla de restaurantes -->
+    <div class="table-responsive" *ngIf="
+        !cargando() &&
+        !error() &&
+        restaurantesFiltrados.length > 0
+      ">
       <table>
         <thead>
           <tr>
-            <th>RESTAURANTE</th>
-            <th>ADMINISTRADOR</th>
-            <th>FECHA DE REGISTRO</th>
-            <th>ESTADO</th>
-            <th>MENÚ PÚBLICO</th>
+            <th>Restaurante</th>
+            <th>Administrador</th>
+            <th>Estado</th>
+            <th>Fecha de registro</th>
+            <th>Acciones</th>
           </tr>
         </thead>
 
         <tbody>
           <tr *ngFor="let restaurante of restaurantesFiltrados">
             <td>
-              <div class="restaurant-name">
-                <span class="restaurant-avatar">
-                  {{ restaurante.nombre.charAt(0) }}
-                </span>
-
-                <div>
-                  <strong>{{ restaurante.nombre }}</strong>
-                  <small>{{ restaurante.slug }}</small>
-                </div>
-              </div>
+              <strong>{{ restaurante.nombre }}</strong>
+              <small>{{ restaurante.slug }}</small>
             </td>
 
             <td>
-              <div class="admin-info">
-                <strong>{{ restaurante.administrador }}</strong>
-                <small>{{ restaurante.correo }}</small>
-              </div>
+              <span>
+                {{ restaurante.administrador || 'Sin administrador' }}
+              </span>
+              <small>
+                {{ restaurante.correo || 'Sin correo' }}
+              </small>
             </td>
 
-            <td>{{ restaurante.fecha | date:'dd/MM/yyyy' }}</td>
-
             <td>
-              <span
-                class="status"
-                [class.active]="restaurante.estado === 'Activo'"
-                [class.suspended]="restaurante.estado === 'Suspendido'"
-              >
-                <span class="status-dot"></span>
+              <span [class.green-text]="
+                  restaurante.estado.toLowerCase() === 'activo'
+                " [class.orange-text]="
+                  restaurante.estado.toLowerCase() === 'suspendido'
+                ">
                 {{ restaurante.estado }}
               </span>
             </td>
 
             <td>
-              <a
-                class="menu-link"
-                [href]="'/' + restaurante.slug"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Ver menú ↗
-              </a>
+              {{ restaurante.fecha || 'Sin fecha' }}
             </td>
-          </tr>
-
-          <tr *ngIf="restaurantesFiltrados.length === 0">
-            <td colspan="5">
-              <div class="empty-state">
-                <span>⌕</span>
-                <strong>No encontramos restaurantes</strong>
-                <p>Prueba con otro término o cambia el filtro de estado.</p>
-              </div>
+            <td>
+              <button type="button" class="status-button"
+                [class.suspend-button]="restaurante.estado.toLowerCase() === 'activo'"
+                [class.activate-button]="restaurante.estado.toLowerCase() === 'suspendido'"
+                [disabled]="restauranteProcesando() !== null" (click)="cambiarEstado(restaurante)">
+                {{
+                restauranteProcesando() === restaurante.id
+                ? 'Procesando...'
+                : restaurante.estado.toLowerCase() === 'activo'
+                ? 'Suspender'
+                : 'Reactivar'
+                }}
+              </button>
             </td>
           </tr>
         </tbody>
       </table>
     </div>
-
-    <footer class="table-footer">
-      Mostrando {{ restaurantesFiltrados.length }} de
-      {{ restaurantes.length }} restaurantes
-    </footer>
   </section>
-
-  <p class="demo-notice">
-    Estos registros son de demostración. Los cambios y la información real
-    se incorporarán cuando conectemos el módulo con Laravel y MySQL.
-  </p>
 </div>

@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -52,5 +51,10 @@ class Usuario extends Authenticatable
             'rol',
             'creado_en'
         );
+    }
+
+    public function esSuperadministrador(): bool
+    {
+        return (bool) $this->es_superadministrador;
     }
 }

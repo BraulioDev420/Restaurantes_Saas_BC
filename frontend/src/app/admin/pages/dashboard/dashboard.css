@@ -204,3 +204,121 @@
     padding: 18px;
   }
 }
+
+/* Estados de carga y errores */
+.loading-state {
+  padding: 40px 16px;
+  text-align: center;
+  color: #778078;
+  font-size: 13px;
+}
+
+.error-message {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 9px;
+  background: #fff0ed;
+  color: #a93226;
+  font-size: 13px;
+}
+
+.error-message button {
+  border: 1px solid #e7b8b1;
+  border-radius: 7px;
+  padding: 8px 12px;
+  background: white;
+  color: #a93226;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* Restaurantes recientes */
+.recent-list {
+  display: flex;
+  flex-direction: column;
+  margin-top: 22px;
+}
+
+.recent-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 0;
+  border-bottom: 1px solid #edf0eb;
+}
+
+.recent-item:last-child {
+  border-bottom: none;
+}
+
+.recent-icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  border-radius: 11px;
+  background: #edf2e9;
+  color: #34553c;
+  font-size: 20px;
+}
+
+.recent-info {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.recent-info strong {
+  color: #2b4030;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+.recent-info span,
+.recent-info small {
+  color: #7a847b;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.status-badge {
+  flex-shrink: 0;
+  padding: 6px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.status-active {
+  background: #e7f7ed;
+  color: #187443;
+}
+
+.status-suspended {
+  background: #fff0ed;
+  color: #c0392b;
+}
+
+@media (max-width: 600px) {
+  .recent-item {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .recent-info {
+    flex-basis: calc(100% - 60px);
+  }
+
+  .status-badge {
+    margin-left: 56px;
+  }
+}

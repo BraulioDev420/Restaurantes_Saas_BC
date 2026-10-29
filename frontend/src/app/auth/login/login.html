@@ -1,0 +1,40 @@
+<div class="login-page">
+  <form class="login-card" (ngSubmit)="iniciarSesion()">
+    <div class="brand">Saborea</div>
+
+    <h1>Panel de administración</h1>
+    <p class="subtitle">
+      Ingresa con tu cuenta de superadministrador.
+    </p>
+
+    <label for="correo">Correo electrónico</label>
+    <input
+      id="correo"
+      type="email"
+      name="correo"
+      [(ngModel)]="correo"
+      autocomplete="username"
+      placeholder="admin@ejemplo.com"
+      required
+    />
+
+    <label for="contrasena">Contraseña</label>
+    <input
+      id="contrasena"
+      type="password"
+      name="contrasena"
+      [(ngModel)]="contrasena"
+      autocomplete="current-password"
+      placeholder="Tu contraseña"
+      required
+    />
+
+    <p class="error" *ngIf="error()" role="alert">
+      {{ error() }}
+    </p>
+
+    <button type="submit" [disabled]="cargando()">
+      {{ cargando() ? 'Verificando...' : 'Iniciar sesión' }}
+    </button>
+  </form>
+</div>

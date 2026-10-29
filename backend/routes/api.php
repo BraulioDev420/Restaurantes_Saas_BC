@@ -7,12 +7,12 @@ use App\Http\Controllers\Api\GastoController;
 use App\Http\Controllers\Api\MenuPublicoController;
 use App\Http\Controllers\Api\PagoController;
 use App\Http\Controllers\Api\PedidoController;
+use App\Http\Controllers\Api\PedidoPublicoController;
 use App\Http\Controllers\Api\ProductoController;
 use App\Http\Controllers\Api\ReporteController;
 use App\Http\Controllers\Api\UsuarioController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\PedidoPublicoController;
 
 Route::get('/estado', function () {
     return response()->json([
@@ -20,7 +20,6 @@ Route::get('/estado', function () {
         'estado'  => 'ok',
     ]);
 });
-
 
 Route::post('/login', [AuthController::class, 'login'])
     ->middleware('throttle:5,1');
@@ -302,5 +301,40 @@ Route::middleware('auth:sanctum')->group(function () {
             [UsuarioController::class, 'destroy']
         );
     });
+
+    //SUPERADMIN
+    Route::prefix('admin')
+        ->middleware('superadministrador')
+        ->group(function () {
+            Route::get(
+                '/restaurantes',
+                [\App\Http\Controllers\Api\SuperadminRestauranteController::class, 'index']
+            );
+
+            Route::post(
+                '/restaurantes',
+                [\App\Http\Controllers\Api\SuperadminRestauranteController::class, 'store']
+            );
+            Route::patch(
+                '/restaurantes/{id}/estado',
+                [
+                    \App\Http\Controllers\Api\SuperadminRestauranteController::class,
+                    'cambiarEstado',
+                ]
+            )->whereNumber('id');
+            Route::get('/yo', function (\Illuminate\Http\Request $request) {
+                $usuario = $request->user();
+
+                return response()->json([
+                    'usuario' => [
+                        'id_usuario'            => $usuario->id_usuario,
+                        'nombre'                => $usuario->nombre,
+                        'correo'                => $usuario->correo,
+                        'es_superadministrador' => true,
+                    ],
+                ]);
+            });
+
+        });
 
 });
