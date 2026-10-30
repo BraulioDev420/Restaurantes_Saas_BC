@@ -1,0 +1,163 @@
+
+<div class="page">
+  <div class="page-heading">
+    <div>
+      <a routerLink="/admin/restaurantes" class="back-link">
+        ← Volver a restaurantes
+      </a>
+
+      <span class="eyebrow">ADMINISTRACIÓN GLOBAL</span>
+      <h2>Editar restaurante</h2>
+      <p>Actualiza la información general del negocio en Saborea.</p>
+    </div>
+  </div>
+
+  <div *ngIf="cargando()" class="alert info" role="status">
+    Cargando los datos del restaurante...
+  </div>
+
+  <form
+    *ngIf="!cargando() && !error().includes('no existe') && id > 0"
+    #formulario="ngForm"
+    (ngSubmit)="guardar()"
+    class="restaurant-form"
+  >
+    <section class="form-card">
+      <div class="section-title">
+        <span class="section-number">01</span>
+        <div>
+          <h3>Información del restaurante</h3>
+          <p>Modifica los datos que identifican al negocio.</p>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <label class="field full">
+          <span>Nombre del restaurante *</span>
+          <input
+            type="text"
+            name="nombre"
+            [(ngModel)]="restaurante.nombre"
+            required
+            maxlength="120"
+            placeholder="Ej. Sabores del Caribe"
+          />
+        </label>
+
+        <label class="field">
+          <span>Slug del menú público *</span>
+          <div class="slug-input">
+            <span>/</span>
+            <input
+              type="text"
+              name="slug"
+              [(ngModel)]="restaurante.slug"
+              required
+              pattern="[a-z0-9]+(-[a-z0-9]+)*"
+              maxlength="100"
+              placeholder="sabores-del-caribe"
+            />
+          </div>
+          <small>Modificarlo también cambia la dirección pública del menú.</small>
+        </label>
+
+        <label class="field">
+          <span>Teléfono del restaurante</span>
+          <input
+            type="tel"
+            name="telefono"
+            [(ngModel)]="restaurante.telefono"
+            maxlength="20"
+            placeholder="Ej. 3001234567"
+          />
+        </label>
+
+        <label class="field">
+          <span>Correo de contacto</span>
+          <input
+            type="email"
+            name="correo"
+            [(ngModel)]="restaurante.correo"
+            email
+            placeholder="contacto@restaurante.com"
+          />
+        </label>
+
+        <label class="field">
+          <span>Dirección</span>
+          <input
+            type="text"
+            name="direccion"
+            [(ngModel)]="restaurante.direccion"
+            maxlength="255"
+            placeholder="Dirección del establecimiento"
+          />
+        </label>
+
+        <label class="field full">
+          <span>Descripción</span>
+          <textarea
+            name="descripcion"
+            [(ngModel)]="restaurante.descripcion"
+            rows="3"
+            maxlength="1000"
+            placeholder="Describe brevemente el restaurante..."
+          ></textarea>
+        </label>
+      </div>
+    </section>
+
+    <section class="form-card">
+      <div class="section-title">
+        <span class="section-number">02</span>
+        <div>
+          <h3>Datos que se conservarán</h3>
+          <p>Esta edición no modifica la configuración administrativa.</p>
+        </div>
+      </div>
+
+      <ul class="preserved-list">
+        <li>La cuenta y las credenciales del administrador.</li>
+        <li>El estado actual del restaurante.</li>
+        <li>Los pedidos y demás registros existentes.</li>
+      </ul>
+    </section>
+
+    <div *ngIf="error()" class="alert error" role="alert">
+      {{ error() }}
+    </div>
+
+    <div *ngIf="mensaje()" class="alert success" role="status">
+      {{ mensaje() }}
+    </div>
+
+    <div class="form-actions">
+      <a routerLink="/admin/restaurantes" class="cancel-button">
+        Cancelar
+      </a>
+
+      <button
+        type="submit"
+        class="submit-button"
+        [disabled]="formulario.invalid || guardando()"
+      >
+        {{ guardando() ? 'Guardando cambios...' : 'Guardar cambios' }}
+      </button>
+    </div>
+  </form>
+
+  <div
+    *ngIf="!cargando() && error()"
+    class="alert error"
+    role="alert"
+  >
+    {{ error() }}
+    <button
+      type="button"
+      class="retry-button"
+      (click)="cargarRestaurante()"
+    >
+      Volver a intentar
+    </button>
+  </div>
+</div>

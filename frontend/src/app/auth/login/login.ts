@@ -33,25 +33,32 @@ export class LoginComponent {
     this.cargando.set(true);
 
     this.auth.iniciarSesion(this.correo.trim(), this.contrasena).subscribe({
-      next: () => {
-        this.auth.verificarSuperadministrador().subscribe({
-          next: (respuesta) => {
-            this.cargando.set(false);
+      next: (respuesta) => {
+        this.cargando.set(false);
 
-            if (respuesta.usuario.es_superadministrador) {
-              this.router.navigate(['/admin/dashboard']);
-            } else {
-              this.auth.limpiarSesionLocal();
-              this.error.set('Esta cuenta no tiene permisos de superadministrador.');
-            }
-          },
-          error: () => {
-            this.auth.limpiarSesionLocal();
-            this.cargando.set(false);
-            this.error.set('No fue posible verificar los permisos de esta cuenta.');
-          }
-        });
+        if (respuesta.usuario.es_superadministrador) {
+          this.router.navigate(['/admin/dashboard']);
+          return;
+        }
+
+        if (respuesta.restaurantes.length === 1) {
+          const restaurante = respuesta.restaurantes[0];
+
+          this.router.navigate(['/panel', restaurante.id_restaurante]);
+          return;
+        }
+
+        if (respuesta.restaurantes.length > 1) {
+          this.error.set(
+            'Tu cuenta pertenece a varios restaurantes. Próximamente podrás seleccionar uno.'
+          );
+          return;
+        }
+
+        this.auth.limpiarSesionLocal();
+        this.error.set('Tu cuenta no tiene restaurantes activos asignados.');
       },
+
       error: (error) => {
         this.cargando.set(false);
 

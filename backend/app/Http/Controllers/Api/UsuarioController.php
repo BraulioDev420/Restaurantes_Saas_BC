@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -33,11 +34,11 @@ class UsuarioController extends Controller
             ->map(function ($usuario) {
                 return [
                     'id_usuario' => $usuario->id_usuario,
-                    'nombre'     => $usuario->nombre,
-                    'correo'     => $usuario->correo,
-                    'estado'     => $usuario->estado,
-                    'rol'        => $usuario->pivot->rol,
-                    'creado_en'  => $usuario->pivot->creado_en,
+                    'nombre' => $usuario->nombre,
+                    'correo' => $usuario->correo,
+                    'estado' => $usuario->estado,
+                    'rol' => $usuario->pivot->rol,
+                    'creado_en' => $usuario->pivot->creado_en,
                 ];
             });
 
@@ -52,18 +53,18 @@ class UsuarioController extends Controller
         $restauranteModel = $this->restaurante($restaurante);
 
         $datos = $request->validate([
-            'nombre'     => ['required', 'string', 'max:150'],
-            'correo'     => ['required', 'email', 'max:150', 'unique:usuarios,correo'],
+            'nombre' => ['required', 'string', 'max:150'],
+            'correo' => ['required', 'email', 'max:150', 'unique:usuarios,correo'],
             'contrasena' => ['required', 'string', 'min:8', 'max:255'],
-            'rol'        => ['required', Rule::in(self::ROLES)],
+            'rol' => ['required', Rule::in(self::ROLES)],
         ]);
 
         $usuario = DB::transaction(function () use ($datos, $restauranteModel) {
             $usuario = Usuario::create([
-                'nombre'     => $datos['nombre'],
-                'correo'     => $datos['correo'],
+                'nombre' => $datos['nombre'],
+                'correo' => $datos['correo'],
                 'contrasena' => Hash::make($datos['contrasena']),
-                'estado'     => 'activo',
+                'estado' => 'activo',
             ]);
 
             $restauranteModel->usuarios()->attach($usuario->id_usuario, [
@@ -77,16 +78,16 @@ class UsuarioController extends Controller
             'mensaje' => 'Usuario creado correctamente.',
             'usuario' => [
                 'id_usuario' => $usuario->id_usuario,
-                'nombre'     => $usuario->nombre,
-                'correo'     => $usuario->correo,
-                'estado'     => $usuario->estado,
-                'rol'        => $datos['rol'],
+                'nombre' => $usuario->nombre,
+                'correo' => $usuario->correo,
+                'estado' => $usuario->estado,
+                'rol' => $datos['rol'],
             ],
         ], 201);
     }
 
     /**
-     * Actualizar nombre, correo y rol dentro del restaurante.
+     * Actualizar datos del usuario y su rol en el restaurante.
      */
     public function update(
         Request $request,
@@ -94,7 +95,10 @@ class UsuarioController extends Controller
         string $usuario
     ): JsonResponse {
         $restauranteModel = $this->restaurante($restaurante);
-        $usuarioModel     = $this->usuarioDelRestaurante($restauranteModel, $usuario);
+        $usuarioModel = $this->usuarioDelRestaurante(
+            $restauranteModel,
+            $usuario
+        );
 
         $datos = $request->validate([
             'nombre' => ['sometimes', 'required', 'string', 'max:150'],
@@ -108,24 +112,43 @@ class UsuarioController extends Controller
                     'id_usuario'
                 ),
             ],
-            'rol'    => ['sometimes', 'required', Rule::in(self::ROLES)],
-
+            'rol' => [
+                'sometimes',
+                'required',
+                Rule::in(self::ROLES),
+            ],
+            'estado' => [
+                'sometimes',
+                'required',
+                Rule::in(['activo', 'inactivo']),
+            ],
         ]);
+
+        // No permitir que el usuario se desactive a sí mismo.
+        if (
+            isset($datos['estado'])
+            && $datos['estado'] !== 'activo'
+            && (int) $request->user()->id_usuario
+                === (int) $usuarioModel->id_usuario
+        ) {
+            throw ValidationException::withMessages([
+                'estado' => ['No puedes desactivar tu propia cuenta.'],
+            ]);
+        }
 
         DB::transaction(function () use (
             $datos,
             $usuarioModel,
-            $restauranteModel,
-            $request
+            $restauranteModel
         ) {
-            $usuarioModel = Usuario::where(
-                'id_usuario',
-                $usuarioModel->id_usuario
-            )->lockForUpdate()->firstOrFail();
+            $usuarioBloqueado = Usuario::query()
+                ->where('id_usuario', $usuarioModel->id_usuario)
+                ->lockForUpdate()
+                ->firstOrFail();
 
             $asociacion = DB::table('restaurantes_usuarios')
                 ->where('id_restaurante', $restauranteModel->id_restaurante)
-                ->where('id_usuario', $usuarioModel->id_usuario)
+                ->where('id_usuario', $usuarioBloqueado->id_usuario)
                 ->lockForUpdate()
                 ->first();
 
@@ -134,13 +157,17 @@ class UsuarioController extends Controller
             }
 
             $nuevoRol = $datos['rol'] ?? $asociacion->rol;
+            $nuevoEstado = $datos['estado'] ?? $usuarioBloqueado->estado;
 
-            $nuevoRol = $datos['rol'] ?? $asociacion->rol;
+            $seRetiraAdministradorActivo =
+                $asociacion->rol === 'administrador'
+                && $usuarioBloqueado->estado === 'activo'
+                && (
+                    $nuevoRol !== 'administrador'
+                    || $nuevoEstado !== 'activo'
+                );
 
-            if ($asociacion->rol === 'administrador'
-                && $usuarioModel->estado === 'activo'
-                && $nuevoRol !== 'administrador') {
-
+            if ($seRetiraAdministradorActivo) {
                 $administradoresActivos = DB::table('restaurantes_usuarios')
                     ->join(
                         'usuarios',
@@ -158,21 +185,11 @@ class UsuarioController extends Controller
 
                 if ($administradoresActivos <= 1) {
                     throw ValidationException::withMessages([
-                        'rol' => [
-                            'No puedes quitar el rol al último administrador activo del restaurante.',
+                        'usuario' => [
+                            'No puedes quitar el rol, desactivar o dejar sin administrador activo al restaurante.',
                         ],
                     ]);
                 }
-            }
-
-            // No permitir desactivar la propia cuenta desde este endpoint.
-            if (
-                (int) $request->user()->id_usuario === (int) $usuarioModel->id_usuario
-                && $nuevoEstado !== 'activo'
-            ) {
-                throw ValidationException::withMessages([
-                    'estado' => ['No puedes desactivar tu propia cuenta.'],
-                ]);
             }
 
             $camposUsuario = array_intersect_key(
@@ -180,8 +197,8 @@ class UsuarioController extends Controller
                 array_flip(['nombre', 'correo', 'estado'])
             );
 
-            $usuarioModel->fill($camposUsuario);
-            $usuarioModel->save();
+            $usuarioBloqueado->fill($camposUsuario);
+            $usuarioBloqueado->save();
 
             if (isset($datos['rol'])) {
                 DB::table('restaurantes_usuarios')
@@ -189,7 +206,7 @@ class UsuarioController extends Controller
                         'id_restaurante',
                         $restauranteModel->id_restaurante
                     )
-                    ->where('id_usuario', $usuarioModel->id_usuario)
+                    ->where('id_usuario', $usuarioBloqueado->id_usuario)
                     ->update(['rol' => $datos['rol']]);
             }
         });
@@ -205,9 +222,15 @@ class UsuarioController extends Controller
     public function destroy(string $restaurante, string $usuario): JsonResponse
     {
         $restauranteModel = $this->restaurante($restaurante);
-        $usuarioModel     = $this->usuarioDelRestaurante($restauranteModel, $usuario);
+        $usuarioModel = $this->usuarioDelRestaurante(
+            $restauranteModel,
+            $usuario
+        );
 
-        if ((int) request()->user()->id_usuario === (int) $usuarioModel->id_usuario) {
+        if (
+            (int) request()->user()->id_usuario
+            === (int) $usuarioModel->id_usuario
+        ) {
             throw ValidationException::withMessages([
                 'usuario' => ['No puedes desvincularte a ti mismo.'],
             ]);
@@ -224,7 +247,10 @@ class UsuarioController extends Controller
                 abort(404, 'El usuario no pertenece a este restaurante.');
             }
 
-            if ($asociacion->rol === 'administrador') {
+            if (
+                $asociacion->rol === 'administrador'
+                && $usuarioModel->estado === 'activo'
+            ) {
                 $administradoresActivos = DB::table('restaurantes_usuarios')
                     ->join(
                         'usuarios',
@@ -240,10 +266,7 @@ class UsuarioController extends Controller
                     ->where('usuarios.estado', 'activo')
                     ->count();
 
-                if (
-                    $administradoresActivos <= 1
-                    && $usuarioModel->estado === 'activo'
-                ) {
+                if ($administradoresActivos <= 1) {
                     throw ValidationException::withMessages([
                         'usuario' => [
                             'No puedes desvincular al último administrador activo del restaurante.',
@@ -253,9 +276,6 @@ class UsuarioController extends Controller
             }
 
             $restauranteModel->usuarios()->detach($usuarioModel->id_usuario);
-
-            // El usuario global se conserva, ya que podría pertenecer
-            // también a otros restaurantes.
         });
 
         return response()->json([
@@ -269,7 +289,10 @@ class UsuarioController extends Controller
             ->where('id_restaurante', $id)
             ->where('estado', 'activo')
             ->whereHas('usuarios', function ($query) {
-                $query->where('usuarios.id_usuario', request()->user()->id_usuario);
+                $query->where(
+                    'usuarios.id_usuario',
+                    request()->user()->id_usuario
+                );
             })
             ->firstOrFail();
     }

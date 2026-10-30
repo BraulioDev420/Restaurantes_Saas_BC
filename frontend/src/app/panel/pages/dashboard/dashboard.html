@@ -1,1 +1,125 @@
-<p>dashboard works!</p>
+<section class="dashboard-page">
+
+  <header class="topbar">
+    <div>
+      <span class="breadcrumb">Saborea / Inicio</span>
+      <h1>Panel de control</h1>
+    </div>
+
+    <div class="topbar-user">
+      <div class="status-indicator"></div>
+      <span>Sesión activa</span>
+    </div>
+  </header>
+
+  <section class="welcome-section">
+    <div>
+      <span class="welcome-label">BIENVENIDO A SABOREA</span>
+      <h2>¡Hola, {{ nombreUsuario }}! 👋</h2>
+      <p>Gestiona tu restaurante desde un solo lugar.</p>
+    </div>
+
+    <div class="welcome-decoration">🍃</div>
+  </section>
+
+  <section class="section-heading">
+    <div>
+      <h2>Resumen general</h2>
+      <p>Indicadores de tu restaurante</p>
+    </div>
+  </section>
+
+  <section class="stats-grid">
+
+    <article class="stat-card">
+      <div class="stat-top">
+        <span class="stat-icon green">▤</span>
+        <span class="stat-tag">Pedidos</span>
+      </div>
+      <strong class="stat-value">—</strong>
+      <span class="stat-description">Pedidos del día</span>
+      <span class="stat-footer">Disponible al conectar el módulo</span>
+    </article>
+
+    <article class="stat-card">
+      <div class="stat-top">
+        <span class="stat-icon orange">◷</span>
+        <span class="stat-tag">Pendientes</span>
+      </div>
+      <strong class="stat-value">—</strong>
+      <span class="stat-description">Pedidos por atender</span>
+      <span class="stat-footer">Disponible al conectar el módulo</span>
+    </article>
+
+    <article class="stat-card">
+      <div class="stat-top">
+        <span class="stat-icon blue">$</span>
+        <span class="stat-tag">Ventas</span>
+      </div>
+      <strong class="stat-value">—</strong>
+      <span class="stat-description">Ventas del día</span>
+      <span class="stat-footer">Disponible al conectar el módulo</span>
+    </article>
+
+    <article class="stat-card">
+      <div class="stat-top">
+        <span class="stat-icon purple">▣</span>
+        <span class="stat-tag">Productos</span>
+      </div>
+      <strong class="stat-value">—</strong>
+      <span class="stat-description">Productos registrados</span>
+      <span class="stat-footer">Disponible al conectar el módulo</span>
+    </article>
+
+  </section>
+
+  <section class="content-grid">
+
+    <article class="content-card activity-card">
+      <div class="card-heading">
+        <div>
+          <h3>Actividad reciente</h3>
+          <p>Movimientos de tu restaurante</p>
+        </div>
+        <span class="coming-soon">Próximamente</span>
+      </div>
+
+      <div class="empty-state">
+        <div class="empty-icon">▤</div>
+        <h4>Tu actividad aparecerá aquí</h4>
+        <p>
+          Cuando conectemos los pedidos y movimientos,
+          podrás consultar su actividad desde este espacio.
+        </p>
+      </div>
+    </article>
+
+    <article class="content-card quick-card">
+      <div class="card-heading">
+        <div>
+          <h3>Tu restaurante</h3>
+          <p>Información de tu espacio de trabajo</p>
+        </div>
+      </div>
+
+      <div class="restaurant-summary">
+        <div class="summary-icon">🍽</div>
+        <h4>{{ nombreRestaurante }}</h4>
+        <span class="active-badge">
+          <span></span>
+          Cuenta activa
+        </span>
+        <div class="restaurant-id">
+          ID del restaurante: {{ idRestaurante }}
+        </div>
+      </div>
+    </article>
+
+  </section>
+
+  <footer class="footer">
+    <span>Saborea © 2026</span>
+    <span>Gestión inteligente para restaurantes</span>
+  </footer>
+
+</section>

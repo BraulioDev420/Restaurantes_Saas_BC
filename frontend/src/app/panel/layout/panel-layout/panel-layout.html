@@ -1,1 +1,89 @@
-<p>panel-layout works!</p>
+<div class="dashboard">
+
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-icon">S</div>
+      <div>
+        <h2>Saborea</h2>
+        <span>GESTIÓN RESTAURANTES</span>
+      </div>
+    </div>
+
+    <div class="restaurant-info">
+      <div class="restaurant-avatar">🍽</div>
+      <div class="restaurant-details">
+        <strong>{{ nombreRestaurante }}</strong>
+        <span>Restaurante activo</span>
+      </div>
+    </div>
+
+    <div class="menu-label">MENÚ PRINCIPAL</div>
+
+    <nav class="navigation">
+      <a class="nav-item" routerLink="." routerLinkActive="active"
+         [routerLinkActiveOptions]="{ exact: true }">
+        <span class="nav-icon">⌂</span>
+        <span>Inicio</span>
+      </a>
+
+      <div class="nav-item disabled">
+        <span class="nav-icon">▤</span>
+        <span>Pedidos</span>
+        <small>Próximamente</small>
+      </div>
+
+      <div class="nav-item disabled">
+        <span class="nav-icon">▣</span>
+        <span>Productos</span>
+        <small>Próximamente</small>
+      </div>
+
+      <a class="nav-item"
+         [routerLink]="['categorias']"
+         routerLinkActive="active">
+        <span class="nav-icon">▦</span>
+        <span>Categorías</span>
+      </a>
+
+      <div class="nav-item disabled">
+        <span class="nav-icon">♙</span>
+        <span>Clientes</span>
+        <small>Próximamente</small>
+      </div>
+
+      <div class="nav-item disabled">
+        <span class="nav-icon">$</span>
+        <span>Caja y gastos</span>
+        <small>Próximamente</small>
+      </div>
+
+      <div class="nav-item disabled">
+        <span class="nav-icon">▥</span>
+        <span>Reportes</span>
+        <small>Próximamente</small>
+      </div>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <div class="user-profile">
+        <div class="user-avatar">
+          {{ nombreUsuario.charAt(0).toUpperCase() }}
+        </div>
+        <div class="user-details">
+          <strong>{{ nombreUsuario }}</strong>
+          <span>{{ rolUsuario }}</span>
+        </div>
+      </div>
+
+      <button class="logout-button" type="button" (click)="cerrarSesion()">
+        <span>↪</span>
+        Cerrar sesión
+      </button>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <router-outlet></router-outlet>
+  </main>
+
+</div>

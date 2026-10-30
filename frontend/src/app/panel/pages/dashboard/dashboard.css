@@ -1,0 +1,345 @@
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+/* TOPBAR */
+
+.topbar {
+  min-height: 92px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #e8ece8;
+}
+
+.breadcrumb {
+  color: #89958d;
+  font-size: 11px;
+}
+
+.topbar h1 {
+  font-size: 21px;
+  margin: 5px 0 0;
+  letter-spacing: -0.5px;
+}
+
+.topbar-user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #64746a;
+  font-size: 12px;
+}
+
+.status-indicator,
+.active-badge span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #4aa878;
+}
+
+/* WELCOME */
+
+.welcome-section {
+  margin-top: 28px;
+  min-height: 160px;
+  padding: 28px 32px;
+  border-radius: 16px;
+  background: linear-gradient(110deg, #e4efe1, #f0f6ed);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  overflow: hidden;
+}
+
+.welcome-label {
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  color: #5e8469;
+  font-weight: 700;
+}
+
+.welcome-section h2 {
+  margin: 10px 0 6px;
+  font-size: 26px;
+  color: #244b36;
+  letter-spacing: -0.8px;
+}
+
+.welcome-section p {
+  color: #728578;
+  margin: 0;
+  font-size: 13px;
+}
+
+.welcome-decoration {
+  font-size: 75px;
+  opacity: 0.65;
+  transform: rotate(-15deg);
+}
+
+/* SECTION HEADING */
+
+.section-heading {
+  margin: 32px 0 17px;
+}
+
+.section-heading h2,
+.card-heading h3 {
+  margin: 0;
+  font-size: 16px;
+  color: #293a30;
+}
+
+.section-heading p,
+.card-heading p {
+  color: #89958d;
+  font-size: 11px;
+  margin: 5px 0 0;
+}
+
+/* STAT CARDS */
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 17px;
+}
+
+.stat-card,
+.content-card {
+  background: #fff;
+  border: 1px solid #e9eee9;
+  border-radius: 13px;
+  padding: 20px;
+}
+
+.stat-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.stat-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+}
+
+.stat-icon.green {
+  background: #e8f4e9;
+  color: #398451;
+}
+
+.stat-icon.orange {
+  background: #fff1df;
+  color: #c78a3c;
+}
+
+.stat-icon.blue {
+  background: #e7f0fc;
+  color: #5483bd;
+}
+
+.stat-icon.purple {
+  background: #f0eafd;
+  color: #8666b9;
+}
+
+.stat-tag {
+  color: #9aa49d;
+  font-size: 10px;
+}
+
+.stat-value {
+  display: block;
+  font-size: 29px;
+  margin-top: 20px;
+  color: #34453a;
+}
+
+.stat-description {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.stat-footer {
+  display: block;
+  margin-top: 14px;
+  color: #9ba59e;
+  font-size: 9px;
+}
+
+/* CONTENT */
+
+.content-grid {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 18px;
+  margin-top: 23px;
+}
+
+.content-card {
+  min-height: 270px;
+}
+
+.card-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.coming-soon {
+  padding: 6px 9px;
+  border-radius: 20px;
+  background: #f0f3ef;
+  color: #79877d;
+  font-size: 9px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 30px 15px;
+}
+
+.empty-icon {
+  width: 47px;
+  height: 47px;
+  border-radius: 13px;
+  background: #edf4eb;
+  color: #64866a;
+  display: grid;
+  place-items: center;
+  margin: 0 auto 12px;
+  font-size: 22px;
+}
+
+.empty-state h4 {
+  font-size: 13px;
+  margin: 0 0 7px;
+}
+
+.empty-state p {
+  max-width: 290px;
+  margin: 0 auto;
+  font-size: 11px;
+  line-height: 1.7;
+  color: #929d95;
+}
+
+/* RESTAURANT SUMMARY */
+
+.restaurant-summary {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 25px;
+}
+
+.summary-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  background: #eaf3e7;
+  font-size: 28px;
+}
+
+.restaurant-summary h4 {
+  margin: 13px 0 9px;
+  font-size: 15px;
+}
+
+.active-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #e9f5eb;
+  color: #438456;
+  padding: 6px 11px;
+  border-radius: 20px;
+  font-size: 10px;
+}
+
+.active-badge span {
+  width: 6px;
+  height: 6px;
+}
+
+.restaurant-id {
+  margin-top: 18px;
+  color: #929d95;
+  font-size: 10px;
+}
+
+/* FOOTER */
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 25px 0;
+  color: #9aa49d;
+  font-size: 10px;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 1100px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .content-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .welcome-section {
+    padding: 23px;
+  }
+
+  .welcome-section h2 {
+    font-size: 21px;
+  }
+
+  .welcome-decoration {
+    font-size: 48px;
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .topbar {
+    min-height: 80px;
+  }
+
+  .topbar h1 {
+    font-size: 18px;
+  }
+
+  .topbar-user {
+    font-size: 10px;
+  }
+
+  .welcome-decoration {
+    display: none;
+  }
+
+  .footer {
+    flex-direction: column;
+  }
+}

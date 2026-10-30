@@ -15,24 +15,37 @@ class SuperadminRestauranteController extends Controller
     /**
      * Lista todos los restaurantes para el panel global.
      */
+
     public function index(): JsonResponse
     {
+        // Seleccionar un administrador activo por restaurante.
+        $administradores = DB::table('restaurantes_usuarios as ru')
+            ->join('usuarios as u', 'u.id_usuario', '=', 'ru.id_usuario')
+            ->where('ru.rol', 'administrador')
+            ->where('u.estado', 'activo')
+            ->select([
+                'ru.id_restaurante',
+                DB::raw('MIN(ru.id_usuario) as id_usuario'),
+            ])
+            ->groupBy('ru.id_restaurante');
+
         $restaurantes = Restaurante::query()
-            ->leftJoin(
-                'restaurantes_usuarios as ru',
+            ->leftJoinSub(
+                $administradores,
+                'administradores',
                 function ($join) {
                     $join->on(
-                        'ru.id_restaurante',
+                        'administradores.id_restaurante',
                         '=',
                         'restaurantes.id_restaurante'
-                    )->where('ru.rol', '=', 'administrador');
+                    );
                 }
             )
             ->leftJoin(
                 'usuarios as u',
                 'u.id_usuario',
                 '=',
-                'ru.id_usuario'
+                'administradores.id_usuario'
             )
             ->select([
                 'restaurantes.id_restaurante as id',
@@ -59,8 +72,17 @@ class SuperadminRestauranteController extends Controller
                 ];
             });
 
+        // Contar administradores activos sin duplicar usuarios.
+        $totalAdministradores = DB::table('restaurantes_usuarios as ru')
+            ->join('usuarios as u', 'u.id_usuario', '=', 'ru.id_usuario')
+            ->where('ru.rol', 'administrador')
+            ->where('u.estado', 'activo')
+            ->distinct('ru.id_usuario')
+            ->count('ru.id_usuario');
+
         return response()->json([
-            'restaurantes' => $restaurantes,
+            'restaurantes'          => $restaurantes,
+            'total_administradores' => $totalAdministradores,
         ]);
     }
 
@@ -144,6 +166,105 @@ class SuperadminRestauranteController extends Controller
             'mensaje'     => 'Restaurante creado correctamente.',
             'restaurante' => $resultado,
         ], 201);
+    }
+
+    /**
+     * Consulta los datos de un restaurante para editarlo.
+     */
+    public function show(int $id): JsonResponse
+    {
+        $restaurante = Restaurante::find($id);
+
+        if (! $restaurante) {
+            return response()->json([
+                'mensaje' => 'El restaurante no existe.',
+            ], 404);
+        }
+
+        return response()->json([
+            'restaurante' => [
+                'id'          => (int) $restaurante->id_restaurante,
+                'nombre'      => $restaurante->nombre,
+                'slug'        => $restaurante->slug,
+                'descripcion' => $restaurante->descripcion,
+                'telefono'    => $restaurante->telefono,
+                'correo'      => $restaurante->correo,
+                'direccion'   => $restaurante->direccion,
+                'estado'      => $restaurante->estado,
+            ],
+        ]);
+    }
+
+    /**
+     * Actualiza los datos generales de un restaurante.
+     */
+    public function update(Request $request, int $id): JsonResponse
+    {
+        $restaurante = Restaurante::find($id);
+
+        if (! $restaurante) {
+            return response()->json([
+                'mensaje' => 'El restaurante no existe.',
+            ], 404);
+        }
+
+        $datos = $request->validate([
+            'nombre'      => [
+                'required',
+                'string',
+                'max:255',
+            ],
+            'slug'        => [
+                'required',
+                'string',
+                'max:255',
+                'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/',
+                Rule::unique('restaurantes', 'slug')
+                    ->ignore($id, 'id_restaurante'),
+            ],
+            'descripcion' => [
+                'nullable',
+                'string',
+            ],
+            'telefono'    => [
+                'nullable',
+                'string',
+                'max:50',
+            ],
+            'correo'      => [
+                'nullable',
+                'email',
+                'max:255',
+            ],
+            'direccion'   => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
+        ]);
+
+        $restaurante->nombre      = $datos['nombre'];
+        $restaurante->slug        = $datos['slug'];
+        $restaurante->descripcion = $datos['descripcion'] ?? null;
+        $restaurante->telefono    = $datos['telefono'] ?? null;
+        $restaurante->correo      = $datos['correo'] ?? null;
+        $restaurante->direccion   = $datos['direccion'] ?? null;
+
+        $restaurante->save();
+
+        return response()->json([
+            'mensaje'     => 'Restaurante actualizado correctamente.',
+            'restaurante' => [
+                'id'          => (int) $restaurante->id_restaurante,
+                'nombre'      => $restaurante->nombre,
+                'slug'        => $restaurante->slug,
+                'descripcion' => $restaurante->descripcion,
+                'telefono'    => $restaurante->telefono,
+                'correo'      => $restaurante->correo,
+                'direccion'   => $restaurante->direccion,
+                'estado'      => $restaurante->estado,
+            ],
+        ]);
     }
 
     /**

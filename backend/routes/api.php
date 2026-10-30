@@ -315,6 +315,23 @@ Route::middleware('auth:sanctum')->group(function () {
                 '/restaurantes',
                 [\App\Http\Controllers\Api\SuperadminRestauranteController::class, 'store']
             );
+            
+            Route::get(
+                '/restaurantes/{id}',
+                [
+                    \App\Http\Controllers\Api\SuperadminRestauranteController::class,
+                    'show',
+                ]
+            )->whereNumber('id');
+
+            Route::put(
+                '/restaurantes/{id}',
+                [
+                    \App\Http\Controllers\Api\SuperadminRestauranteController::class,
+                    'update',
+                ]
+            )->whereNumber('id');
+
             Route::patch(
                 '/restaurantes/{id}/estado',
                 [

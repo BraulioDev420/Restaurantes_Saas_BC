@@ -139,20 +139,29 @@
             <td>
               {{ restaurante.fecha || 'Sin fecha' }}
             </td>
+
             <td>
-              <button type="button" class="status-button"
-                [class.suspend-button]="restaurante.estado.toLowerCase() === 'activo'"
-                [class.activate-button]="restaurante.estado.toLowerCase() === 'suspendido'"
-                [disabled]="restauranteProcesando() !== null" (click)="cambiarEstado(restaurante)">
-                {{
-                restauranteProcesando() === restaurante.id
-                ? 'Procesando...'
-                : restaurante.estado.toLowerCase() === 'activo'
-                ? 'Suspender'
-                : 'Reactivar'
-                }}
-              </button>
+              <div class="action-buttons">
+                <a class="edit-button" [routerLink]="['/admin/restaurantes', restaurante.id, 'editar']"
+                  [attr.aria-label]="'Editar ' + restaurante.nombre">
+                  Editar
+                </a>
+
+                <button type="button" class="status-button"
+                  [class.suspend-button]="restaurante.estado.toLowerCase() === 'activo'"
+                  [class.activate-button]="restaurante.estado.toLowerCase() === 'suspendido'"
+                  [disabled]="restauranteProcesando() !== null" (click)="cambiarEstado(restaurante)">
+                  {{
+                  restauranteProcesando() === restaurante.id
+                  ? 'Procesando...'
+                  : restaurante.estado.toLowerCase() === 'activo'
+                  ? 'Suspender'
+                  : 'Reactivar'
+                  }}
+                </button>
+              </div>
             </td>
+
           </tr>
         </tbody>
       </table>

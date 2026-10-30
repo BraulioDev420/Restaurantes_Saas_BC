@@ -1,1 +1,258 @@
-<p>categorias works!</p>
+<section class="categorias-page">
+
+  <header class="page-header">
+    <div>
+      <span class="eyebrow">GESTIÓN DEL RESTAURANTE</span>
+      <h1>Categorías</h1>
+      <p>Organiza los productos de tu menú por categorías.</p>
+    </div>
+
+    @if (esAdministrador) {
+      <button
+        type="button"
+        class="btn-primary"
+        (click)="abrirFormulario()"
+        [disabled]="guardando()">
+        <span>+</span> Nueva categoría
+      </button>
+    }
+  </header>
+
+  @if (mensaje()) {
+    <div class="alert alert-success">
+      {{ mensaje() }}
+    </div>
+  }
+
+  @if (error()) {
+    <div class="alert alert-error">
+      {{ error() }}
+    </div>
+  }
+
+  <div class="summary-card">
+    <div class="summary-icon">▦</div>
+    <div>
+      <span>Total de categorías</span>
+      <strong>{{ categorias().length }}</strong>
+    </div>
+  </div>
+
+  @if (mostrarFormulario()) {
+    <div class="form-overlay">
+      <div class="form-modal">
+
+        <div class="modal-header">
+          <div>
+            <h2>
+              {{ categoriaEditando() ? 'Editar categoría' : 'Nueva categoría' }}
+            </h2>
+            <p>
+              {{ categoriaEditando()
+                ? 'Modifica la información de esta categoría.'
+                : 'Completa los datos para crear una categoría.' }}
+            </p>
+          </div>
+
+          <button
+            type="button"
+            class="btn-close"
+            (click)="cancelarFormulario()"
+            [disabled]="guardando()">
+            ×
+          </button>
+        </div>
+
+        <form (ngSubmit)="guardarCategoria()">
+
+          <div class="form-group">
+            <label for="nombre">Nombre <span>*</span></label>
+            <input
+              id="nombre"
+              type="text"
+              [ngModel]="nombre()"
+              (ngModelChange)="nombre.set($event)"
+              name="nombre"
+              placeholder="Ej. Hamburguesas"
+              maxlength="100"
+              required>
+          </div>
+
+          <div class="form-group">
+            <label for="descripcion">Descripción</label>
+            <textarea
+              id="descripcion"
+              [ngModel]="descripcion()"
+              (ngModelChange)="descripcion.set($event)"
+              name="descripcion"
+              rows="3"
+              placeholder="Describe brevemente esta categoría...">
+            </textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="ordenMenu">Orden en el menú</label>
+            <input
+              id="ordenMenu"
+              type="number"
+              [ngModel]="ordenMenu()"
+              (ngModelChange)="ordenMenu.set(+$event)"
+              name="ordenMenu"
+              min="0">
+            <small>Las categorías con menor número aparecerán primero.</small>
+          </div>
+
+          @if (categoriaEditando()) {
+            <label class="checkbox-group">
+              <input
+                type="checkbox"
+                [ngModel]="activo()"
+                (ngModelChange)="activo.set($event)"
+                name="activo">
+              <span>Categoría activa</span>
+            </label>
+          }
+
+          <div class="modal-actions">
+            <button
+              type="button"
+              class="btn-secondary"
+              (click)="cancelarFormulario()"
+              [disabled]="guardando()">
+              Cancelar
+            </button>
+
+            <button
+              type="submit"
+              class="btn-primary"
+              [disabled]="guardando() || !nombre().trim()">
+              {{ guardando()
+                ? 'Guardando...'
+                : categoriaEditando()
+                  ? 'Guardar cambios'
+                  : 'Crear categoría' }}
+            </button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  }
+
+  <div class="content-card">
+
+    <div class="table-header">
+      <div>
+        <h2>Listado de categorías</h2>
+        <p>Administra las categorías de tu restaurante.</p>
+      </div>
+    </div>
+
+    @if (cargando()) {
+      <div class="loading-state">
+        <div class="spinner"></div>
+        <p>Cargando categorías...</p>
+      </div>
+    } @else if (categorias().length === 0) {
+      <div class="empty-state">
+        <div class="empty-icon">▦</div>
+        <h3>No hay categorías todavía</h3>
+        <p>
+          Crea tu primera categoría para comenzar a organizar los productos
+          de tu menú.
+        </p>
+
+        @if (esAdministrador) {
+          <button
+            type="button"
+            class="btn-primary"
+            (click)="abrirFormulario()">
+            Crear primera categoría
+          </button>
+        }
+      </div>
+    } @else {
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Categoría</th>
+              <th>Descripción</th>
+              <th>Orden</th>
+              <th>Estado</th>
+              @if (esAdministrador) {
+                <th class="actions-column">Acciones</th>
+              }
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (categoria of categorias(); track categoria.id_categoria) {
+              <tr>
+                <td>
+                  <div class="category-name">
+                    <div class="category-icon">▦</div>
+                    <strong>{{ categoria.nombre }}</strong>
+                  </div>
+                </td>
+
+                <td>
+                  <span class="description-text">
+                    {{ categoria.descripcion || 'Sin descripción' }}
+                  </span>
+                </td>
+
+                <td>
+                  <span class="order-badge">
+                    {{ categoria.orden_menu }}
+                  </span>
+                </td>
+
+                <td>
+                  <span
+                    class="status-badge"
+                    [class.status-active]="categoria.activo"
+                    [class.status-inactive]="!categoria.activo">
+                    {{ categoria.activo ? 'Activa' : 'Inactiva' }}
+                  </span>
+                </td>
+
+                @if (esAdministrador) {
+                  <td>
+                    <div class="action-buttons">
+                      <button
+                        type="button"
+                        class="btn-edit"
+                        (click)="editarCategoria(categoria)"
+                        title="Editar categoría">
+                        Editar
+                      </button>
+
+                      <button
+                        type="button"
+                        class="btn-toggle"
+                        [class.btn-activate]="!categoria.activo"
+                        (click)="cambiarEstado(categoria)"
+                        [title]="categoria.activo
+                          ? 'Desactivar categoría'
+                          : 'Activar categoría'">
+                        {{ categoria.activo ? 'Desactivar' : 'Activar' }}
+                      </button>
+                    </div>
+                  </td>
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="table-footer">
+        Mostrando {{ categorias().length }}
+        {{ categorias().length === 1 ? 'categoría' : 'categorías' }}
+      </div>
+    }
+
+  </div>
+
+</section>

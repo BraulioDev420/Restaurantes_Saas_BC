@@ -34,6 +34,24 @@ class AuthController extends Controller
 
         $token = $usuario->createToken('restaurantes-saas')->plainTextToken;
 
+        // Consultar los restaurantes activos asociados al usuario.
+        $restaurantes = $usuario->restaurantes()
+            ->where('restaurantes.estado', 'activo')
+            ->get([
+                'restaurantes.id_restaurante',
+                'restaurantes.nombre',
+                'restaurantes.slug',
+            ])
+            ->map(function ($restaurante) {
+                return [
+                    'id_restaurante' => $restaurante->id_restaurante,
+                    'nombre' => $restaurante->nombre,
+                    'slug' => $restaurante->slug,
+                    'rol' => $restaurante->pivot->rol,
+                ];
+            })
+            ->values();
+
         return response()->json([
             'mensaje' => 'Inicio de sesión exitoso.',
             'token' => $token,
@@ -42,7 +60,9 @@ class AuthController extends Controller
                 'id_usuario' => $usuario->id_usuario,
                 'nombre' => $usuario->nombre,
                 'correo' => $usuario->correo,
+                'es_superadministrador' => $usuario->esSuperadministrador(),
             ],
+            'restaurantes' => $restaurantes,
         ]);
     }
 

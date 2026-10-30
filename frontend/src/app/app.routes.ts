@@ -1,6 +1,7 @@
 
 import { Routes } from '@angular/router';
 import { superadminGuard } from './auth/superadmin-guard';
+import { restaurantGuard } from './auth/restaurant-guard';
 
 export const routes: Routes = [
   {
@@ -9,7 +10,7 @@ export const routes: Routes = [
     redirectTo: 'restaurante-prueba'
   },
 
-  // Inicio de sesión del superadministrador
+  // Inicio de sesión
   {
     path: 'login',
     loadComponent: () =>
@@ -47,7 +48,37 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./admin/pages/restaurantes/nuevo-restaurante/nuevo-restaurante')
             .then(m => m.NuevoRestaurante)
+      },
+      {
+        path: 'restaurantes/:id/editar',
+        loadComponent: () =>
+          import('./admin/pages/restaurantes/editar-restaurante/editar-restaurante')
+            .then(m => m.EditarRestaurante)
       }
+    ]
+  },
+
+  // Panel de administración del restaurante
+  {
+    path: 'panel/:id_restaurante',
+    canActivate: [restaurantGuard],
+    loadComponent: () =>
+      import('./panel/layout/panel-layout/panel-layout')
+        .then(m => m.PanelLayout),
+    children: [
+      {
+        path: '',
+        pathMatch: 'full',
+        loadComponent: () =>
+          import('./panel/pages/dashboard/dashboard')
+            .then(m => m.Dashboard)
+      },
+      {
+      path: 'categorias',
+      loadComponent: () =>
+        import('./panel/pages/categorias/categorias')
+          .then(m => m.Categorias)
+    }
     ]
   },
 

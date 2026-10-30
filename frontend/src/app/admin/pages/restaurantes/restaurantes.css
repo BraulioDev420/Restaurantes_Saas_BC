@@ -350,3 +350,37 @@ td {
   background: #e7f7ed;
   color: #187443;
 }
+
+.action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.edit-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  border: 1px solid #dce7d9;
+  border-radius: 8px;
+  background: #f3f7f0;
+  color: #28533a;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.edit-button:hover {
+  background: #e3eddf;
+}
+
+@media (max-width: 650px) {
+  .action-buttons {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}
